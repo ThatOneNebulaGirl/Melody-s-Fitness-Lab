@@ -7,7 +7,7 @@
 <title>Gym Calc</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   box-sizing:border-box;
@@ -21,8 +21,8 @@
   --msil:#fbeff5; --mline:rgba(143,106,130,.6); --mn:rgba(143,106,130,.17); --mp:#ff8a1f; --ms:#ffd23a;
   --mpa:rgba(201,59,115,.82); --msa:rgba(255,150,195,.85);
   --glowline:rgba(240,111,160,.6); --glowbox:rgba(255,120,175,.40);
-  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
-  --body:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --display:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
 /* night version: plum with the same pink */
 :root[data-theme="dark"]{
@@ -157,6 +157,48 @@ nav button{font-size:15px;min-height:40px}
   .row{gap:8px}
   .result .big{font-size:44px}
 }
+
+/* ---- 10% wider column, everything inside the cards, centred ---- */
+:root{--col:63vw}
+main{min-width:250px}
+.card,.hint,.mleg,label.f,.cap,.msg{overflow-wrap:anywhere}
+.card{min-width:0}
+.card label.f{text-align:center}
+.seg{justify-content:center}
+.hint{text-align:center}
+.mleg{align-items:center;text-align:center}
+.mleg .k{display:block}
+.mchip{margin:0 4px}
+.wbox,.volbox{text-align:center}
+#lSets,#lReps{text-align:center}
+.plate{justify-content:center;gap:14px}
+.chip{width:46px;height:38px;border-radius:19px;font-size:18px}
+.step button{width:34px;height:38px;border-radius:10px}
+.step output{min-width:22px}
+.card .viz{margin-top:8px;padding:4px 0 0}
+#bbCtl .plate{border-top:1px solid var(--line)}
+#bbCtl .plate:first-of-type{border-top:0}
+#conv{padding-top:min(22vh,150px)}
+
+/* ---- collapsible barbell card, no lines between plate rows ---- */
+.acc{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:44px;background:transparent;border:0;color:var(--ink);font:700 18px var(--body);cursor:pointer;padding:0}
+.acc .accs{font:500 13px var(--body);color:var(--muted)}
+.acc .chev{transition:transform .15s;color:var(--strong)}
+.acc[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.barbox{display:flex;flex-direction:column;align-items:center;gap:8px;margin:8px 0 6px}
+.mini2{font:600 13px var(--body);min-height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--line);background:var(--field);color:var(--ink);cursor:pointer}
+.cap:empty{display:none}
+.plate,#bbCtl .plate,#bbCtl .plate:first-of-type{border-top:0}
+
+/* ---- one-row body area, tick-box for a different bar ---- */
+#lArea{flex-wrap:nowrap;gap:4px}
+#lArea button{flex:1 1 0;min-width:0;padding:0 3px;font-size:12.5px;line-height:1.1;white-space:normal;min-height:44px;border-radius:16px}
+.chk{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 6px;cursor:pointer;font:500 13.5px var(--body);color:var(--ink);min-height:36px}
+.chk input{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--strong);background:var(--field);display:grid;place-content:center;margin:0;box-shadow:0 0 10px var(--glowbox);cursor:pointer;flex:none}
+.chk input::after{content:"";width:12px;height:6px;border-left:3px solid var(--accent-ink);border-bottom:3px solid var(--accent-ink);transform:rotate(-45deg) translate(1px,-1px);opacity:0}
+.chk input:checked{background:var(--accent)}
+.chk input:checked::after{opacity:1}
+.chip{font-weight:700}
 </style>
 </head>
 <body>
@@ -176,12 +218,6 @@ nav button{font-size:15px;min-height:40px}
       <label class="f">Equipment</label>
       <div class="seg" id="eqSeg"></div>
     </div>
-    <div class="card" id="muscleCard">
-      <label class="f">Muscles worked</label>
-      <div class="mapwrap" id="mMap"></div>
-      <div class="mleg" id="mLegend"></div>
-      <p class="hint" id="mNote" style="margin:8px 0 0"></p>
-    </div>
     <div class="card">
       <div id="lAreaWrap">
         <label class="f">Body area</label>
@@ -195,23 +231,26 @@ nav button{font-size:15px;min-height:40px}
         <div class="seg" id="lAtt"></div>
       </div>
     </div>
-    <div id="bbCtl">
-      <div class="card">
-        <label class="f">Bar weight</label>
-        <div class="seg" id="pBarSeg"></div>
-      </div>
-      <div class="card">
-        <p class="hint">Each + adds a pair: one plate on each side, 2 plates in all.</p>
+    <div class="card" id="muscleCard">
+      <label class="f">Activated muscles</label>
+      <div class="mapwrap" id="mMap"></div>
+      <div class="mleg" id="mLegend"></div>
+      <p class="hint" id="mNote" style="margin:8px 0 0"></p>
+    </div>
+    <div class="card" id="bbCtl">
+      <div id="bbBody">
+        <div class="viz" id="pViz"></div>
+        <label class="chk"><input type="checkbox" id="barChk"><span>Different bar (standard is 45 lb)</span></label>
+        <div class="seg" id="pBarSeg" hidden></div>
         <div id="pList"></div>
       </div>
     </div>
     <div class="card" id="fxCard" hidden>
       <label class="f" id="fxLabel">Weight</label>
       <div id="fxBody"></div>
+      <div class="viz" id="dbViz" hidden></div>
+      <div class="viz" id="ezViz" hidden></div>
     </div>
-    <div class="card viz" id="pViz"></div>
-    <div class="card viz" id="dbViz" hidden></div>
-    <div class="card viz" id="ezViz" hidden></div>
     <div class="card" id="liftCard">
       <div class="grid3">
         <div><label class="f">Weight</label><div class="wbox" id="lWeight"><span class="wmain" id="lWMain">0 lb</span><span class="wsub" id="lWSub">0 kg</span></div></div>
@@ -271,6 +310,7 @@ nav button{font-size:15px;min-height:40px}
 (function(){
   var LB_PER_KG = 2.20462262185;
   function fmt(n){ if(!isFinite(n)) return ""; return String(parseFloat(n.toFixed(2))); }
+  function hexA(h, a){ var v = parseInt(h.slice(1), 16); return 'rgba(' + (v >> 16) + ',' + ((v >> 8) & 255) + ',' + (v & 255) + ',' + a + ')'; }
   function num(s){ var v = parseFloat(String(s).replace(",", ".")); return isFinite(v) ? v : NaN; }
 
 
@@ -719,6 +759,13 @@ nav button{font-size:15px;min-height:40px}
     }).catch(function(){ motionBtn.textContent = "Tilt n/a"; });
   });
 
+  var askedTilt = false;
+  document.addEventListener("click", function(ev){
+    if(askedTilt || !Bg.supported || Bg.isOn() || (ev.target && ev.target.closest && ev.target.closest("#motionBtn"))) return;
+    askedTilt = true;
+    Bg.enable().then(function(ok){ if(ok) motionUI(true); }).catch(function(){});
+  }, true);
+
   /* ---------- Converter ---------- */
   var pairs = [
     {a:"lb", b:"kg", ab:function(x){return x/LB_PER_KG;}, ba:function(x){return x*LB_PER_KG;}},
@@ -756,9 +803,9 @@ nav button{font-size:15px;min-height:40px}
   /* ---------- Plates ---------- */
   var SETS = {
     lb: {plates:[45,35,25,10,5,2.5], bars:[45,35,33], colors:{
-      "45":["#8fb8f0","#4a2b3d"],"35":["#f7d77a","#4a2b3d"],"25":["#8fdcb4","#4a2b3d"],"10":["#f3ecf5","#4a2b3d"],"5":["#f59cbc","#4a2b3d"],"2.5":["#c5a6ec","#4a2b3d"]}},
+      "45":["#3a6bff","#ffffff"],"35":["#9a5bff","#ffffff"],"25":["#00d7ff","#04122a"],"10":["#d4f1ff","#04122a"],"5":["#28f0b0","#04122a"],"2.5":["#7a8cff","#ffffff"]}},
     kg: {plates:[25,20,15,10,5,2.5,1.25], bars:[20,15], colors:{
-      "25":["#f59cbc","#4a2b3d"],"20":["#8fb8f0","#4a2b3d"],"15":["#f7d77a","#4a2b3d"],"10":["#8fdcb4","#4a2b3d"],"5":["#f3ecf5","#4a2b3d"],"2.5":["#c5a6ec","#4a2b3d"],"1.25":["#cfd4dc","#4a2b3d"]}}
+      "25":["#3a6bff","#ffffff"],"20":["#9a5bff","#ffffff"],"15":["#00d7ff","#04122a"],"10":["#d4f1ff","#04122a"],"5":["#28f0b0","#04122a"],"2.5":["#7a8cff","#ffffff"],"1.25":["#b9c4ff","#04122a"]}}
   };
   var P = {unit:"lb", mode:"side", bar:45, halo:false, counts:{lb:{}, kg:{}}};   // each + is a pair: one plate per side
 
@@ -938,7 +985,7 @@ nav button{font-size:15px;min-height:40px}
       (P.bar ? P.bar + " " + P.unit + " bar" : "no bar") + '</text></svg>';
 
     var cap, warn = false;
-    if(!L.length && !R.length) cap = "Add plates to see them on the bar";
+    if(!L.length && !R.length) cap = "";
     else if(P.mode === "all" && odd.length){ cap = "Uneven: odd number of " + odd.join(", ") + " plates, so one side has an extra"; warn = true; }
     else cap = "Each side: " + summ(L);
     el.innerHTML = svg + '<div class="cap' + (warn ? ' warn' : '') + '">' + cap + '</div>';
@@ -958,7 +1005,7 @@ nav button{font-size:15px;min-height:40px}
       var row = document.createElement("div");
       row.className = "plate";
       row.innerHTML =
-        '<div class="chip" style="background:'+col[0]+';color:'+col[1]+'">'+w+'</div>' +
+        '<div class="chip" style="background:'+hexA(col[0], .16)+';border:1.5px solid '+hexA(col[0], .95)+';color:var(--ink);box-shadow:0 0 10px '+hexA(col[0], .35)+'">'+w+'</div>' +
         '<div class="pl2">'+(c ? (c*2)+' plates' : '')+'</div>' +
         '<div class="step"><button type="button" aria-label="Remove a pair of '+w+' plates">−</button><output>'+c+'</output><button type="button" aria-label="Add a pair of '+w+' plates">+</button></div>';
       var btns = row.querySelectorAll("button");
@@ -971,6 +1018,11 @@ nav button{font-size:15px;min-height:40px}
     updateLift();
   }
   document.getElementById("pReset").addEventListener("click", function(){ P.counts[P.unit] = {}; renderPlates(); });
+  document.getElementById("barChk").addEventListener("change", function(){
+    var on = this.checked;
+    document.getElementById("pBarSeg").hidden = !on;
+    if(!on){ P.bar = SETS[P.unit].bars[0]; P.halo = true; renderPlates(); }       // unticked = the standard 45 lb bar
+  });
 
   /* ---------- Equipment: barbell, EZ bar, dumbbell, machine ---------- */
   var E = {type:"barbell", ez:30, db:25, hands:2, machine:50};
@@ -1176,7 +1228,7 @@ nav button{font-size:15px;min-height:40px}
     function side(sd){                                  // flat side view: one rounded disc, the number runs up its edge
       var x0 = sd < 0 ? -Lh / 2 - T : Lh / 2;
       return disc(x0, -R, T, 2 * R, col, q, 3) +
-        '<text transform="translate(' + (x0 + T / 2).toFixed(2) + ' 0) rotate(-90)" text-anchor="middle" dominant-baseline="central" font-size="' + Math.min(T * 0.78, fs).toFixed(1) + '" font-weight="700" font-family="Barlow Condensed,Arial Narrow,sans-serif" fill="#3b2237" fill-opacity=".7">' + lb + '</text>';
+        '<text transform="translate(' + (x0 + T / 2).toFixed(2) + ' 0) rotate(-90)" text-anchor="middle" dominant-baseline="central" font-size="' + Math.min(T * 0.78, fs).toFixed(1) + '" font-weight="700" font-family="Instrument Sans,Arial,sans-serif" fill="#3b2237" fill-opacity=".7">' + lb + '</text>';
     }
     function head3d(sd){                                // round disc seen at an angle: back rim, side wall, face
       var xf = sd < 0 ? -Lh / 2 : Lh / 2 + T, xb = xf - T, o = '';
@@ -1190,7 +1242,7 @@ nav button{font-size:15px;min-height:40px}
       o += '<ellipse cx="' + xf.toFixed(2) + '" cy="0" rx="' + e.toFixed(2) + '" ry="' + R.toFixed(2) + '" fill="' + col + '" stroke="rgba(0,0,0,.6)" stroke-width=".7"/>' +
            '<ellipse cx="' + xf.toFixed(2) + '" cy="0" rx="' + e.toFixed(2) + '" ry="' + R.toFixed(2) + '" fill="url(#fc' + q + ')"/>' +
            '<ellipse cx="' + xf.toFixed(2) + '" cy="0" rx="' + (e * 0.8).toFixed(2) + '" ry="' + (R * 0.82).toFixed(2) + '" fill="none" stroke="#fff" stroke-opacity=".32" stroke-width=".6"/>';
-      if(sd > 0) o += '<text transform="translate(' + xf.toFixed(2) + ' 0) rotate(' + (-ang) + ')" text-anchor="middle" dominant-baseline="central" font-size="' + fs.toFixed(1) + '" font-weight="700" font-family="Barlow Condensed,Arial Narrow,sans-serif" fill="#3b2237" fill-opacity=".72">' + lb + '</text>';
+      if(sd > 0) o += '<text transform="translate(' + xf.toFixed(2) + ' 0) rotate(' + (-ang) + ')" text-anchor="middle" dominant-baseline="central" font-size="' + fs.toFixed(1) + '" font-weight="700" font-family="Instrument Sans,Arial,sans-serif" fill="#3b2237" fill-opacity=".72">' + lb + '</text>';
       return o;
     }
     var handle = '<rect x="' + (-Lh / 2) + '" y="' + (-rh).toFixed(2) + '" width="' + Lh.toFixed(1) + '" height="' + (2 * rh).toFixed(2) + '" fill="url(#ch' + q + ')" stroke="rgba(0,0,0,.55)" stroke-width=".6"/>' +
