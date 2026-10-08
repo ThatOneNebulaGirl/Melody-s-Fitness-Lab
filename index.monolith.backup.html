@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Gym Calc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  /* My Melody pastels: hood pink, milk white, lavender */
+  --bg:#fff1f6; --surface:#ffffff; --ink:#4a2b3d; --muted:#8f6a82; --line:#f4d2e2;
+  --accent:#ffb6d3; --accent-ink:#4a2b3d; --strong:#c93b73; --focus:#d9487f; --field:rgba(255,250,252,.55); --glow:rgba(255,182,211,.55);
+  --res-bg:linear-gradient(135deg,rgba(255,217,232,.58) 0%,rgba(234,220,255,.58) 100%); --res-bd:#f6c6dc; --res-big:#c93b73; --res-ink:#4a2b3d; --res-alt:#7a5570; --res-why:#8f6a82;
+  --glass:rgba(255,255,255,.34);
+  --msil:#fbeff5; --mline:rgba(143,106,130,.6); --mn:rgba(143,106,130,.17); --mp:#ff8a1f; --ms:#ffd23a;
+  --mpa:rgba(201,59,115,.82); --msa:rgba(255,150,195,.85);
+  --glowline:rgba(240,111,160,.6); --glowbox:rgba(255,120,175,.40);
+  --display:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+/* night version: plum with the same pink */
+:root[data-theme="dark"]{
+  --bg:#050a18; --surface:#0b1530; --ink:#e6f3ff; --muted:#8fb0d0; --line:#1b3358;
+  --accent:#4fe3ff; --accent-ink:#031420; --strong:#4fe3ff; --focus:#4fe3ff; --field:rgba(6,14,32,.5); --glow:rgba(40,120,255,.22);
+  --glass:rgba(8,16,40,.30);
+  --msil:#0f1a33; --mline:rgba(143,176,208,.55); --mn:rgba(143,176,208,.17); --mp:#ff8a1f; --ms:#ffd23a;
+  --mpa:rgba(79,227,255,.8); --msa:rgba(79,227,255,.38);
+  --glowline:rgba(79,227,255,.75); --glowbox:rgba(0,200,255,.45);
+  --res-bg:linear-gradient(135deg,rgba(14,40,96,.55) 0%,rgba(40,16,90,.55) 100%); --res-bd:#1f4a8a; --res-big:#7df3ff; --res-ink:#e6f3ff; --res-alt:#b8d4f0; --res-why:#8fb0d0;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:radial-gradient(90% 320px at 50% 0,var(--glow),transparent) no-repeat,var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%;min-height:100vh}
+main{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 2px 12px}
+h1{font-family:var(--display);font-size:32px;margin:0;letter-spacing:.02em;font-weight:700}
+#modeBtn,#motionBtn{font:600 14px var(--body);min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface);border:1px solid var(--line);padding:4px;border-radius:14px;margin-bottom:14px}
+nav button{font:600 16px var(--body);min-height:44px;border:0;border-radius:11px;background:transparent;color:var(--muted);cursor:pointer}
+nav button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+section[hidden]{display:none}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;display:grid;grid-template-columns:1fr 24px 1fr;align-items:center;gap:6px}
+.row .eq{text-align:center;color:var(--strong);font-weight:600}
+.fld{position:relative}
+.fld input{padding-right:46px}
+.fld .unit{position:absolute;right:13px;top:50%;transform:translateY(-50%);font:600 15px var(--body);color:var(--muted);pointer-events:none}
+label.f{display:block;font-size:13px;color:var(--muted);font-weight:500}
+input[type=text],input[type=password]{width:100%;min-height:48px;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:10px;padding:6px 10px;font:700 24px var(--display);letter-spacing:.01em}
+input[type=text],input[type=password]{box-shadow:0 0 0 1px var(--glowline),0 0 14px var(--glowbox)}
+input[type=text]:focus,input[type=password]:focus,button:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
+input[type=text]:focus,input[type=password]:focus{box-shadow:0 0 0 2px var(--glowline),0 0 24px var(--glowbox)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 2px}
+.seg button{font:600 15px var(--body);min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:var(--field);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--strong)}
+.plate{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+.plate:first-of-type{border-top:0}
+.chip{height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;font:700 22px var(--display);box-shadow:inset 0 -3px 0 rgba(74,43,61,.12)}
+.step{display:flex;align-items:center;gap:8px}
+.step button{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--field);color:var(--ink);font:600 26px var(--body);cursor:pointer}
+.step button:active{background:var(--accent)}
+.step output{min-width:34px;text-align:center;font:700 28px var(--display)}
+.result{background:var(--res-bg);border:1px solid var(--res-bd);color:var(--res-ink);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.result .big{font:700 56px/1 var(--display);color:var(--res-big)}
+.result .big small{font-size:24px;font-weight:600;margin-left:4px;color:var(--res-ink)}
+.result .alt{font:600 26px var(--display);margin-top:4px;color:var(--res-alt)}
+.result .why{font-size:14px;margin-top:8px;color:var(--res-why)}
+.reset{font:600 15px var(--body);min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.viz{padding:8px 8px 12px}
+.viz svg{display:block;width:100%;height:auto}
+.viz .cap{font-size:14px;color:var(--muted);margin-top:4px;text-align:center}
+.viz .cap.warn{color:var(--strong);font-weight:600}
+.viz svg{overflow:visible}
+.halo-glow,.halo-heart{transform-box:fill-box;transform-origin:center;opacity:0}
+.halo-glow{animation:haloGlow 2.8s ease-out both}
+.halo-heart{animation:haloHeart 2.8s ease-out both}
+@keyframes haloGlow{0%{opacity:0;transform:scale(.95)}14%{opacity:.6;transform:scale(1)}58%{opacity:.46}100%{opacity:0;transform:scale(1.02)}}
+@keyframes haloHeart{0%{opacity:0;transform:translate(0,0) scale(.4)}14%{opacity:1;transform:translate(0,0) scale(1)}60%{opacity:.85}100%{opacity:0;transform:translate(var(--dx,0px),var(--dy,0px)) scale(1.1)}}
+@media (prefers-reduced-motion:reduce){.halo-glow,.halo-heart{animation:none;display:none}}
+.hint{font-size:13px;color:var(--muted);margin:0 0 6px}
+.pl2{font-size:14px;color:var(--muted)}
+.wbox{min-height:48px;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:10px;padding:4px 10px;white-space:nowrap;overflow:hidden}
+.wbox .wmain{display:block;font:700 22px/1.15 var(--display)}
+.wbox .wsub{display:block;font:500 12px/1.2 var(--body);color:var(--muted)}
+.volbox{margin-top:12px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--field)}
+.volbox .vbig{font:700 32px/1.1 var(--display);color:var(--strong)}
+.volbox .vsub{font-size:14px;color:var(--muted);margin-top:2px}
+.rec{width:100%;min-height:52px;border-radius:14px;border:0;background:var(--accent);color:var(--accent-ink);font:700 18px var(--body);cursor:pointer;margin:2px 0 6px;box-shadow:0 0 18px var(--glowbox)}
+.msg{font-size:14px;margin:0 0 10px;min-height:20px;color:var(--strong)}
+.entry{padding:12px 14px}
+.entry .t{font-size:13px;color:var(--muted)}
+.entry .h{font:700 24px/1.15 var(--display);margin:2px 0}
+.entry .s{font-size:15px}
+.entry .d{font-size:13px;color:var(--muted);margin-top:2px}
+.entry .del{margin-top:8px;font:600 14px var(--body);min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--field);color:var(--muted);cursor:pointer}
+#logBox{width:100%;min-height:90px;margin-top:8px;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:10px;padding:8px;font:13px/1.35 monospace}
+#logBox[hidden]{display:none}
+#lExOther[hidden]{display:none}
+#ghCard summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--ink)}
+#ghCard [hidden]{display:none}
+#ghCard .rec{margin-top:12px}
+[hidden]{display:none!important}
+.mapwrap svg{display:block;width:100%;max-width:420px;margin:0 auto;height:auto}
+.mapwrap text{font:600 15px var(--body);fill:var(--muted);letter-spacing:.08em}
+.mleg{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:14px}
+.mleg .k{display:inline-flex;align-items:center;gap:6px}
+.mleg .sw{width:14px;height:14px;border-radius:4px;display:inline-block}
+.mchip{display:inline-flex;align-items:center;margin-right:10px;white-space:nowrap}
+.mdot{width:12px;height:12px;border-radius:4px;display:inline-block;margin-right:5px}
+.mleg .sw.p{background:var(--mp)}
+.mleg .sw.s{background:var(--ms);border:1px solid var(--mp)}
+.mi{width:120px!important;text-align:center}
+.stepbig{width:56px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--field);color:var(--ink);font:700 18px var(--body);cursor:pointer}
+.btns{display:flex;gap:8px}
+#motionBtn[hidden]{display:none}
+#motionBtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--strong)}
+#bg{position:fixed;left:0;top:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+.card,.row,nav,#modeBtn,#motionBtn,.reset{background:var(--glass);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.row{background:transparent;border:0;padding:6px 2px;grid-template-columns:1fr 1fr;gap:14px;-webkit-backdrop-filter:none;backdrop-filter:none}
+#motionBtn[aria-pressed="true"]{background:var(--accent)}
+@media (prefers-reduced-motion:no-preference){.step button{transition:background .1s}}
+
+/* ---- narrow centre column so the animated background shows at the sides; tighter spacing ---- */
+:root{--col:57vw}
+main{width:var(--col);min-width:236px;max-width:520px;margin:0 auto;padding:10px 0 32px}
+.top{flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+.top .btns{margin-left:auto}
+h1{font-size:28px}
+#modeBtn,#motionBtn{min-height:38px;padding:0 12px;font-size:13px}
+nav{margin-bottom:8px}
+nav button{font-size:15px;min-height:40px}
+.card{padding:10px;margin-bottom:8px}
+.card,.row,nav,#modeBtn,#motionBtn,.reset{-webkit-backdrop-filter:none;backdrop-filter:none}
+.seg{gap:5px}
+.seg button{min-height:40px;padding:0 12px;font-size:14px}
+.plate{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0}
+.chip{height:42px;width:56px;font-size:20px;border-radius:21px}
+.step{gap:6px}
+.step button{width:40px;height:40px;font-size:22px;border-radius:10px}
+.step output{min-width:26px;font-size:24px}
+.stepbig{width:46px;height:42px}
+.mi{width:90px!important}
+.volbox{padding:8px 10px}
+@media (max-width:480px){
+  .pl2{display:none}
+  .grid3{grid-template-columns:1fr 1fr}
+  .grid3>div:first-child{grid-column:1/-1}
+  .fld input{padding-right:34px;font-size:20px}
+  .fld .unit{font-size:13px;right:8px}
+  .row{gap:8px}
+  .result .big{font-size:44px}
+}
+
+/* ---- 10% wider column, everything inside the cards, centred ---- */
+:root{--col:63vw}
+main{min-width:250px}
+.card,.hint,.mleg,label.f,.cap,.msg{overflow-wrap:anywhere}
+.card{min-width:0}
+.card label.f{text-align:center}
+.seg{justify-content:center}
+.hint{text-align:center}
+.mleg{align-items:center;text-align:center}
+.mleg .k{display:block}
+.mchip{margin:0 4px}
+.wbox,.volbox{text-align:center}
+#lSets,#lReps{text-align:center}
+.plate{justify-content:center;gap:14px}
+.chip{width:46px;height:38px;border-radius:19px;font-size:18px}
+.step button{width:34px;height:38px;border-radius:10px}
+.step output{min-width:22px}
+.card .viz{margin-top:8px;padding:4px 0 0}
+#bbCtl .plate{border-top:1px solid var(--line)}
+#bbCtl .plate:first-of-type{border-top:0}
+#conv{padding-top:min(22vh,150px)}
+
+/* ---- collapsible barbell card, no lines between plate rows ---- */
+.acc{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:44px;background:transparent;border:0;color:var(--ink);font:700 18px var(--body);cursor:pointer;padding:0}
+.acc .accs{font:500 13px var(--body);color:var(--muted)}
+.acc .chev{transition:transform .15s;color:var(--strong)}
+.acc[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.barbox{display:flex;flex-direction:column;align-items:center;gap:8px;margin:8px 0 6px}
+.mini2{font:600 13px var(--body);min-height:34px;padding:0 14px;border-radius:17px;border:1px solid var(--line);background:var(--field);color:var(--ink);cursor:pointer}
+.cap:empty{display:none}
+.plate,#bbCtl .plate,#bbCtl .plate:first-of-type{border-top:0}
+
+/* ---- one-row body area, tick-box for a different bar ---- */
+#lArea{flex-wrap:nowrap;gap:4px}
+#lArea button{flex:1 1 0;min-width:0;padding:0 3px;font-size:12.5px;line-height:1.1;white-space:normal;min-height:44px;border-radius:16px}
+.chk{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 6px;cursor:pointer;font:500 13.5px var(--body);color:var(--ink);min-height:36px}
+.chk input{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--strong);background:var(--field);display:grid;place-content:center;margin:0;box-shadow:0 0 10px var(--glowbox);cursor:pointer;flex:none}
+.chk input::after{content:"";width:12px;height:6px;border-left:3px solid var(--accent-ink);border-bottom:3px solid var(--accent-ink);transform:rotate(-45deg) translate(1px,-1px);opacity:0}
+.chk input:checked{background:var(--accent)}
+.chk input:checked::after{opacity:1}
+.chip{font-weight:700}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<main>
+  <div class="top"><h1>Gym Calc</h1><div class="btns"><button type="button" id="motionBtn" aria-pressed="false">Tilt</button><button type="button" id="modeBtn" aria-pressed="false">Night</button></div></div>
+  <nav role="tablist" aria-label="Tools">
+    <button role="tab" id="t-plates" aria-selected="true" data-tab="plates">Lift</button>
+    <button role="tab" id="t-log" aria-selected="false" data-tab="log">Log</button>
+    <button role="tab" id="t-conv" aria-selected="false" data-tab="conv">Convert</button>
+  </nav>
+
+  <section id="conv" role="tabpanel" aria-labelledby="t-conv" hidden></section>
+
+  <section id="plates" role="tabpanel" aria-labelledby="t-plates">
+    <div class="card">
+      <label class="f">Equipment</label>
+      <div class="seg" id="eqSeg"></div>
+    </div>
+    <div class="card">
+      <div id="lAreaWrap">
+        <label class="f">Body area</label>
+        <div class="seg" id="lArea"></div>
+      </div>
+      <label class="f" style="margin-top:10px" id="lExLabel">Exercise</label>
+      <div class="seg" id="lEx"></div>
+      <input type="text" id="lExOther" aria-label="Exercise name" autocomplete="off" placeholder="Exercise name" style="margin-top:8px" hidden>
+      <div id="lAttWrap" hidden>
+        <label class="f" style="margin-top:10px">Handle / attachment</label>
+        <div class="seg" id="lAtt"></div>
+      </div>
+    </div>
+    <div class="card" id="muscleCard">
+      <label class="f">Activated muscles</label>
+      <div class="mapwrap" id="mMap"></div>
+      <div class="mleg" id="mLegend"></div>
+      <p class="hint" id="mNote" style="margin:8px 0 0"></p>
+    </div>
+    <div class="card" id="bbCtl">
+      <div id="bbBody">
+        <div class="viz" id="pViz"></div>
+        <label class="chk"><input type="checkbox" id="barChk"><span>Different bar (standard is 45 lb)</span></label>
+        <div class="seg" id="pBarSeg" hidden></div>
+        <div id="pList"></div>
+      </div>
+    </div>
+    <div class="card" id="fxCard" hidden>
+      <label class="f" id="fxLabel">Weight</label>
+      <div id="fxBody"></div>
+      <div class="viz" id="dbViz" hidden></div>
+      <div class="viz" id="ezViz" hidden></div>
+    </div>
+    <div class="card" id="liftCard">
+      <div class="grid3">
+        <div><label class="f">Weight</label><div class="wbox" id="lWeight"><span class="wmain" id="lWMain">0 lb</span><span class="wsub" id="lWSub">0 kg</span></div></div>
+        <div><label class="f" for="lSets">Sets</label><input type="text" id="lSets" inputmode="numeric" autocomplete="off" placeholder="1"></div>
+        <div><label class="f" for="lReps">Reps</label><input type="text" id="lReps" inputmode="numeric" autocomplete="off" placeholder="0"></div>
+      </div>
+      <div class="volbox" aria-live="polite">
+        <div class="f" style="font-size:13px;color:var(--muted)">Volume</div>
+        <div class="vbig" id="lVolBig">0 lb</div>
+        <div class="vsub" id="lVolSub">Weight × reps × sets</div>
+      </div>
+      <input type="text" id="lNote" aria-label="Note" autocomplete="off" placeholder="Note (optional)" style="margin-top:12px">
+    </div>
+    <button type="button" class="rec" id="lRec">Record lift</button>
+    <div class="msg" id="lMsg" role="status"></div>
+    <button class="reset" id="pReset">Clear plates</button>
+  </section>
+
+  <section id="log" role="tabpanel" aria-labelledby="t-log" hidden>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+        <strong id="logCount" style="font:700 22px var(--display)">0 lifts</strong>
+        <span class="hint" id="logMsg" style="margin:0"></span>
+      </div>
+      <div class="seg">
+        <button type="button" id="logCopy">Copy as CSV</button>
+        <button type="button" id="logClear">Clear all</button>
+      </div>
+      <textarea id="logBox" readonly hidden aria-label="Log as CSV"></textarea>
+    </div>
+    <div class="card" id="ghCard">
+      <strong style="font:700 20px var(--display)">Private GitHub backup</strong>
+      <div class="hint" id="ghStatus" style="margin-top:4px">Saved on this device only.</div>
+      <div class="seg">
+        <button type="button" id="ghSync" hidden>Sync now</button>
+        <button type="button" id="ghDisc" hidden>Disconnect</button>
+      </div>
+      <details id="ghSetup">
+        <summary>Set up</summary>
+        <label class="f" for="ghRepo">Private repository (owner/name)</label>
+        <input type="text" id="ghRepo" placeholder="yourname/gym-log" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label class="f" for="ghPath" style="margin-top:10px">File</label>
+        <input type="text" id="ghPath" value="gym-log.json" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label class="f" for="ghBranch" style="margin-top:10px">Branch</label>
+        <input type="text" id="ghBranch" value="main" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label class="f" for="ghToken" style="margin-top:10px">Access token</label>
+        <input type="password" id="ghToken" placeholder="github_pat_..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button type="button" class="rec" id="ghConnect">Connect</button>
+        <p class="hint">Use a separate PRIVATE repo for the log. Make a fine-grained token that can only reach that one repo, with Contents set to Read and write. The token stays on this device and is never put in the page's code.</p>
+      </details>
+    </div>
+    <div id="logList"></div>
+  </section>
+</main>
+
+<script>
+(function(){
+  var LB_PER_KG = 2.20462262185;
+  function fmt(n){ if(!isFinite(n)) return ""; return String(parseFloat(n.toFixed(2))); }
+  function hexA(h, a){ var v = parseInt(h.slice(1), 16); return 'rgba(' + (v >> 16) + ',' + ((v >> 8) & 255) + ',' + (v & 255) + ',' + a + ')'; }
+  function num(s){ var v = parseFloat(String(s).replace(",", ".")); return isFinite(v) ? v : NaN; }
+
+
+  /* ---------- E8 background: an elongated oval of E8 points that snakes across the screen when you tilt ---------- */
+  var Bg = (function(){
+    var cv = document.getElementById("bg");
+    var reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    var KEEP_EVERY = 3;        // draw 1 in 3 of the edges between the remaining points
+    var PAL = {
+      light:{edge:["#b9a4ea","#c79fe6","#e497c8","#f08fb4","#f3a58f"], ea:.38, dot:["#b9a4ea","#d98bd0","#f27fae","#f6a38a"], da:.85, soft:true, contour:"#f08fb4"},
+      dark:{edge:["#3a46ff","#1e7bff","#00d4ff","#8a4dff","#8fe6ff"], ea:.56, dot:["#00e5ff","#4a7dff","#a463ff","#ffffff"], da:.95, glow:true, spark:"#7df3ff", contour:"#4d7cff"}
+    };
+    var pal = PAL.light, theme = "light";
+    // colours are built from a hue that the gyro (or the mouse on a computer) turns round the rainbow
+    var HUE = {
+      light:{base:265, edge:[0,20,55,75,115], dot:[0,35,65,115], con:75, sat:72, ls:[70,72,72,72,74], dl:[72,70,70,76]},
+      dark: {base:235, edge:[0,-20,-45,30,-35], dot:[-45,-5,50,0], con:-10, sat:100, ls:[58,62,58,64,78], dl:[62,60,62,100]}
+    };
+    function hs(h, sa, l, a){ return "hsla(" + (((h % 360) + 360) % 360).toFixed(0) + "," + sa + "%," + l + "%," + (a == null ? 1 : a) + ")"; }
+    var EC = [], DC = [], CC = "", SC = "", hue = 0, hueAcc = 0, gact = 0, rot = 0;
+    function makeColors(h){
+      var Hh = HUE[theme], kq;
+      for(kq = 0; kq < 5; kq++) EC[kq] = hs(h + Hh.edge[kq], Hh.sat, Hh.ls[kq]);
+      for(kq = 0; kq < 4; kq++) DC[kq] = (theme === "dark" && kq === 3) ? "#ffffff" : hs(h + Hh.dot[kq], Hh.sat, Hh.dl[kq]);
+      CC = hs(h + Hh.con, Hh.sat, 62); SC = hs(h - 45, 100, 78);
+    }
+    function ca(c, a){ return c.charAt(0) === "#" ? rgba(c, a) : c.replace(/,[^,]*\)$/, "," + a + ")"); }
+
+    // --- E8 roots (240), then keep 120 of them as 60 opposite pairs so the cloud stays balanced
+    var roots = [], i, j, k, n;
+    for(i = 0; i < 8; i++) for(j = i + 1; j < 8; j++) for(var si = -1; si <= 1; si += 2) for(var sj = -1; sj <= 1; sj += 2){
+      var v = [0,0,0,0,0,0,0,0]; v[i] = si; v[j] = sj; roots.push(v);
+    }
+    for(n = 0; n < 256; n++){
+      var v2 = [], neg = 0;
+      for(k = 0; k < 8; k++){ var sg = ((n >> k) & 1) ? 1 : -1; if(sg < 0) neg++; v2.push(sg * 0.5); }
+      if(neg % 2 === 0) roots.push(v2);
+    }
+    var keyOf = function(v){ return v.join(","); }, byKey = {}, seen = {}, pairs = [];
+    roots.forEach(function(v, idx){ byKey[keyOf(v)] = idx; });
+    roots.forEach(function(v, idx){
+      if(seen[idx]) return;
+      var ni = byKey[keyOf(v.map(function(x){ return -x; }))];
+      seen[idx] = seen[ni] = 1; pairs.push([idx, ni]);
+    });
+    var order = pairs.map(function(p, pi){ return [(pi * 37) % pairs.length, p]; }).sort(function(a, b){ return a[0] - b[0]; });
+    var kept = [];
+    order.slice(0, pairs.length / 2).forEach(function(o){ kept.push(roots[o[1][0]], roots[o[1][1]]); });
+    roots = kept;
+    var N = roots.length;
+    var allA = [], allB = [];
+    for(i = 0; i < N; i++) for(j = i + 1; j < N; j++){
+      var d = 0;
+      for(k = 0; k < 8; k++) d += roots[i][k] * roots[j][k];
+      if(Math.abs(d - 1) < 1e-9){ allA.push(i); allB.push(j); }
+    }
+    var stats = {roots:N, edges:allA.length};
+    var ka = [], kb = [];
+    for(i = 0; i < allA.length; i += KEEP_EVERY){ ka.push(allA[i]); kb.push(allB[i]); }
+    var K = ka.length;
+    var bend = new Float32Array(K);
+    for(i = 0; i < K; i++) bend[i] = ((i % 2) ? 1 : -1) * (0.2 + 0.16 * (((i * 13) % 5) / 4));
+
+    // --- the snake's route across the screen (normalised to the window): left edge up, over the top, down the right in S-bends
+    var PATHN = [[.05,.66],[.05,.50],[.07,.34],[.10,.19],[.17,.08],[.30,.05],[.46,.08],[.62,.04],[.78,.07],[.90,.12],[.95,.26],[.92,.42],[.95,.58],
+                 [.93,.74],[.87,.89],[.74,.95],[.58,.92],[.42,.95],[.26,.93],[.12,.87],[.06,.77]];     // a closed loop around the screen
+    var poly = [], cumA = [0], pathLen = 1;
+    function sampleCR(pts, nn){                          // smooth CLOSED curve through the points
+      var n0 = pts.length, Q = [pts[n0 - 1]].concat(pts, [pts[0], pts[1]]), out = [], ii, kk2, t, u, p0, p1, p2, p3, c1x, c1y, c2x, c2y;
+      for(ii = 1; ii <= n0; ii++){
+        p0 = Q[ii-1]; p1 = Q[ii]; p2 = Q[ii+1]; p3 = Q[ii+2];
+        c1x = p1[0] + (p2[0] - p0[0]) / 6; c1y = p1[1] + (p2[1] - p0[1]) / 6; c2x = p2[0] - (p3[0] - p1[0]) / 6; c2y = p2[1] - (p3[1] - p1[1]) / 6;
+        for(kk2 = 0; kk2 < nn; kk2++){
+          t = kk2 / nn; u = 1 - t;
+          out.push([u*u*u*p1[0] + 3*u*u*t*c1x + 3*u*t*t*c2x + t*t*t*p2[0], u*u*u*p1[1] + 3*u*u*t*c1y + 3*u*t*t*c2y + t*t*t*p2[1]]);
+        }
+      }
+      out.push(out[0].slice()); return out;
+    }
+    function buildPath(W, H){
+      poly = sampleCR(PATHN.map(function(p){ return [(0.09 + 0.82 * p[0]) * W, (0.09 + 0.82 * p[1]) * H]; }), 14); cumA = [0];   // kept slightly inside the screen edges
+      for(var ii = 1; ii < poly.length; ii++) cumA.push(cumA[ii-1] + Math.sqrt(Math.pow(poly[ii][0] - poly[ii-1][0], 2) + Math.pow(poly[ii][1] - poly[ii-1][1], 2)));
+      pathLen = cumA[cumA.length - 1] || 1;
+    }
+    function pathAt(sv){                                 // point and normal at fraction sv of the route
+      var tg = (((sv % 1) + 1) % 1) * pathLen, lo2 = 0, hi2 = cumA.length - 1, mid, f2, a2, b2, dx2, dy2, L2;
+      while(hi2 - lo2 > 1){ mid = (lo2 + hi2) >> 1; if(cumA[mid] < tg) lo2 = mid; else hi2 = mid; }
+      f2 = (tg - cumA[lo2]) / ((cumA[hi2] - cumA[lo2]) || 1); a2 = poly[lo2]; b2 = poly[hi2];
+      dx2 = b2[0] - a2[0]; dy2 = b2[1] - a2[1]; L2 = Math.sqrt(dx2*dx2 + dy2*dy2) || 1;
+      return [a2[0] + dx2 * f2, a2[1] + dy2 * f2, -dy2 / L2, dx2 / L2];
+    }
+
+    var ctx = cv && cv.getContext ? cv.getContext("2d") : null;
+    var api = {stats:stats, kept:K, supported:false,
+      setTheme:function(){}, enable:function(){ return Promise.resolve(false); }, disable:function(){}, isOn:function(){ return false; }};
+    if(!ctx) return api;
+
+    var base = new Float64Array(N*8), R = new Float64Array(N*8);
+    for(i = 0; i < N; i++) for(k = 0; k < 8; k++) base[i*8 + k] = roots[i][k];
+    var PL = [[0,1,1],[2,3,.79],[4,5,.61],[6,7,.47],[0,4,.31],[1,5,.27],[2,6,.23],[3,7,.19],[0,6,.13],[1,7,.11]];
+
+    // --- groups: OUTLINE points sit evenly on the heart contour; INNER points fill the heart
+    var isOut = new Uint8Array(N), OLx = new Float32Array(N), OLy = new Float32Array(N), ring = [], birth = new Float32Array(N), initR = new Float64Array(N), initX = new Float64Array(N);
+    (function(){
+      var NBIN = 24, best = [], rmax = new Float32Array(NBIN), o2, x0, y0, th2, r2, bn, kk;
+      for(kk = 0; kk < NBIN; kk++) best.push(-1);
+      for(i = 0; i < N; i++){
+        o2 = i * 8;
+        x0 = base[o2] + .45 * base[o2+3] + .3 * base[o2+6];
+        y0 = base[o2+1] + .45 * base[o2+4] + .3 * base[o2+7];
+        th2 = Math.atan2(x0, -y0); if(th2 < 0) th2 += 6.2832;          // clockwise from "up"
+        r2 = Math.sqrt(x0*x0 + y0*y0); initR[i] = r2; initX[i] = x0;
+        bn = Math.min(NBIN - 1, Math.floor(th2 / 6.2832 * NBIN));
+        if(r2 > rmax[bn]){ rmax[bn] = r2; best[bn] = i; }
+      }
+      ring = best.filter(function(q){ return q >= 0; });
+      ring.forEach(function(idx, r){                    // evenly spaced around the oval's edge
+        var psi = (r + 0.5) / ring.length * 6.2832;
+        isOut[idx] = 1;
+        OLx[idx] = Math.sin(psi);                       // along the snake
+        OLy[idx] = -Math.cos(psi);                      // across it
+      });
+      // inner points are "born" one after another, from the middle outwards: 15 right after the first second, the rest by about 70
+      var inner = [], early = {}, later = [], stepE;
+      for(kk = 0; kk < N; kk++) if(!isOut[kk]) inner.push(kk);
+      inner.sort(function(a2, b2){ return initX[a2] - initX[b2]; });          // walk along the body ...
+      stepE = inner.length / 36;
+      for(kk = 0; kk < 36; kk++) early[inner[Math.min(inner.length - 1, Math.floor(kk * stepE + stepE / 2))]] = 1;   // ... and take 36 evenly spread points to start with
+      inner.forEach(function(idx){ if(!early[idx]) later.push(idx); });
+      later.sort(function(a2, b2){ return initR[a2] - initR[b2]; });
+      Object.keys(early).forEach(function(idx, n3){ birth[+idx] = 0.05 + n3 * 0.015; });
+      later.forEach(function(idx, rnk){ birth[idx] = 6 + 64 * Math.pow(rnk / Math.max(1, later.length - 1), 0.85); });
+    })();
+
+    var pAlpha = new Float32Array(N), dA = new Float32Array(N);
+    for(i = 0; i < N; i++) dA[i] = 1;
+    var tx3 = new Float32Array(N), ty3 = new Float32Array(N), tz3 = new Float32Array(N);
+    var sx = new Float32Array(N), sy = new Float32Array(N), sd = new Float32Array(N), hid = new Float32Array(N);
+    var eBr = new Float32Array(K), eBk = new Uint8Array(K);
+    var NB = 32, rb = new Float32Array(NB), rbT = new Float32Array(NB), rbInit = false, phA = new Float64Array(N), rrA = new Float64Array(N);
+    var SP = [];
+    for(i = 0; i < 18; i++) SP.push({e:-1, u:1, v:0.8 + Math.random() * 1.2});
+
+    var W = 0, H = 0, dpr = 1, needDraw = true;
+    function resize(){
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      buildPath(W, H);
+      needDraw = true;
+      if(reduce) render(.016);
+    }
+    function clamp(x, a, b){ return x < a ? a : (x > b ? b : x); }
+    function rgba(hex, a){ var v = parseInt(hex.slice(1), 16); return 'rgba(' + (v >> 16) + ',' + ((v >> 8) & 255) + ',' + (v & 255) + ',' + a + ')'; }
+
+    var clock = 0, tx = 0, ty = 0, stx = 0, sty = 0, act = 0, last = 0, acc = 0, stride = 1, cost = 0, nf = 0, rhoS = 0, prog = 0, tprog = 0, mode = 0, sS = null, sGap = 0, wph = 0;
+
+    function render(dt){
+      if(W < 2 || H < 2) return;
+      // tilt -> smoothed position; "act" says how much tilting is happening right now
+      var pstx = stx, psty = sty, s = Math.min(1, dt * 6);
+      stx += (tx - stx) * s; sty += (ty - sty) * s;
+      var vel = (Math.abs(stx - pstx) + Math.abs(sty - psty)) / Math.max(dt, 0.001);
+      var pprog = prog; prog += (tprog - prog) * Math.min(1, dt * 3);                      // how far down the page you are (0 top .. 1 bottom)
+      gact += (Math.min(1, vel * 0.5) - gact) * Math.min(1, dt * 5);                       // how much the phone is moving
+      hueAcc += dt * gact * 70;                                                             // keep cycling through the rainbow while it moves
+      hue = HUE[theme].base + 150 * stx + 100 * sty + hueAcc; makeColors(hue);
+      act += (Math.min(1, vel * 0.5 + Math.abs(prog - pprog) / Math.max(dt, 0.001) * 8 + sGap * 6) - act) * Math.min(1, dt * 5);
+
+      // the 8D rotation is steered by the tilt only (rests at 0 when you hold still)
+      if(!reduce) rot += dt * 0.1;                      // the E8 pattern turns on its own, slowly
+      var angle = rot;
+      var tNow = reduce ? 1e6 : clock, grow = 0.9 + 0.1 * (1 - Math.exp(-tNow / 35)), pa;   // inner cluster starts small and spreads
+      R.set(base);
+      var p, o, a, b, th, c, sn, xa, xb;
+      for(p = 0; p < PL.length; p++){
+        a = PL[p][0]; b = PL[p][1]; th = angle * PL[p][2]; c = Math.cos(th); sn = Math.sin(th);
+        for(i = 0; i < N; i++){
+          o = i * 8; xa = R[o + a]; xb = R[o + b];
+          R[o + a] = c * xa - sn * xb; R[o + b] = sn * xa + c * xb;
+        }
+      }
+      var rho = 0, x, y, hh, hmin = 1e9, hmax = -1e9;
+      for(i = 0; i < N; i++){
+        o = i * 8;
+        x = R[o] + .45 * R[o+3] + .3 * R[o+6];
+        y = R[o+1] + .45 * R[o+4] + .3 * R[o+7];
+        tx3[i] = x; ty3[i] = y; tz3[i] = R[o+2] + .45 * R[o+5] + .3 * R[o+6];
+        hh = Math.sqrt(x*x + y*y); if(hh > rho) rho = hh;
+        hh = 0; for(k = 3; k < 8; k++) hh += R[o + k] * R[o + k];
+        hh = Math.sqrt(hh); hid[i] = hh; if(hh < hmin) hmin = hh; if(hh > hmax) hmax = hh;
+      }
+      rhoS = rhoS ? rhoS + (rho - rhoS) * Math.min(1, dt * 2) : rho;
+      for(i = 0; i < N; i++) hid[i] = (hid[i] - hmin) / (hmax - hmin + 1e-12);
+
+      // the snake: an oval of E8 points that slides along the S-shaped route as you tilt
+      var Hl = 0.24, Wpx = Math.min(W, H) * 0.075, Aw = Wpx * 0.85;   // long, slim and wiggly
+      wph += dt * (0.5 + act * 2.2);                   // the helix and the ripple keep turning gently                                                          // the wiggle travels down the body while it moves
+      var sTarget = mode === 0 ? 0.17 + prog * 0.57 : 0.74 + (1 - prog) * 0.43;   // heading down: top-left -> right side -> bottom;  after the bottom: bottom -> up the LEFT side -> top-left
+      if(sS === null) sS = sTarget;
+      var dS = ((sTarget - sS + 0.5) % 1 + 1) % 1 - 0.5;                           // shortest way round the loop, so it never rewinds
+      sS += dS * Math.min(1, dt * 8); sGap = Math.abs(dS);
+      var s0 = sS;
+      var ux, uy, ph, q, f, w, xm, ym, zm, bi, rbound, j0, j1, psn, wave, spp, tpr, psi, zz, crs, dp;
+      rb.fill(0);
+      for(i = 0; i < N; i++){
+        ux = tx3[i]; uy = -ty3[i];
+        phA[i] = Math.atan2(uy, ux); rrA[i] = Math.sqrt(ux*ux + uy*uy);
+        if(isOut[i]) continue;
+        bi = ((Math.floor((phA[i] + Math.PI) / (2 * Math.PI) * NB) % NB) + NB) % NB;
+        if(rrA[i] > rb[bi]) rb[bi] = rrA[i];
+      }
+      for(pass = 0; pass < 3; pass++) for(bi = 0; bi < NB; bi++) if(rb[bi] === 0) rb[bi] = (rb[(bi + NB - 1) % NB] + rb[(bi + 1) % NB]) / 2;
+      for(bi = 0; bi < NB; bi++){
+        var sm = (rb[(bi + NB - 1) % NB] + 2 * rb[bi] + rb[(bi + 1) % NB]) / 4;
+        rbT[bi] = rbInit ? rbT[bi] + (sm - rbT[bi]) * Math.min(1, dt * 3) : sm;
+      }
+      rbInit = true;
+      for(i = 0; i < N; i++){
+        pAlpha[i] = isOut[i] ? 1 : clamp((tNow - birth[i]) / 1.0, 0, 1);
+        if(isOut[i]){ xm = OLx[i]; ym = OLy[i]; zm = tz3[i] / rhoS * 0.3; dA[i] = 1; }
+        else {
+          ph = phA[i];
+          f = (ph + Math.PI) / (2 * Math.PI) * NB; j0 = ((Math.floor(f) % NB) + NB) % NB; j1 = (j0 + 1) % NB; w = f - Math.floor(f);
+          rbound = rbT[j0] * (1 - w) + rbT[j1] * w;
+          q = Math.pow(Math.min(1, rrA[i] / (rbound + 1e-9)), 0.75) * 0.85 * grow;
+          xm = q * Math.cos(ph); ym = q * Math.sin(ph); zm = tz3[i] / rhoS * 0.45;
+          psi = 6.2832 * 1.25 * xm + wph * 1.4;           // screw the cross-section round the spine: a slow double-helix feel
+          zz = zm * 1.7; crs = ym * Math.cos(psi) - zz * Math.sin(psi); dp = ym * Math.sin(psi) + zz * Math.cos(psi);
+          ym = crs; zm = dp * 0.5; dA[i] = 0.6 + 0.4 * clamp((dp + 1) / 2, 0, 1);   // the far side of the helix is dimmer
+        }
+        spp = s0 + xm * Hl;
+        wave = Aw * Math.sin(6.2832 * 13 * spp - wph);                  // S-bends that stay on the track, like a snake following its trail
+        tpr = 0.62 + 0.38 * (xm + 1) / 2;                               // slimmer tail, fuller head
+        psn = pathAt(spp);
+        sx[i] = psn[0] + psn[2] * (ym * Wpx * tpr + wave);
+        sy[i] = psn[1] + psn[3] * (ym * Wpx * tpr + wave);
+        sd[i] = zm;
+      }
+
+      var emin = 1e9, emax = -1e9, m, m2, e, ia, ib;
+      for(e = 0; e < K; e++){
+        ia = ka[e] * 8; ib = kb[e] * 8; m2 = 0;
+        for(k = 3; k < 8; k++){ m = (R[ia + k] + R[ib + k]) * .5; m2 += m * m; }
+        m2 = Math.sqrt(m2); eBr[e] = m2;
+        if(m2 < emin) emin = m2; if(m2 > emax) emax = m2;
+      }
+      var er = emax - emin + 1e-12;
+      for(e = 0; e < K; e++) eBk[e] = Math.min(4, Math.floor((eBr[e] - emin) / er * 5));
+
+      // ---- draw ----
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      var glow = !!pal.glow;
+      ctx.globalCompositeOperation = glow ? "lighter" : "source-over";
+      var maxLen = Wpx * 4.4, bk, ax, ay, bx, by, dx, dy, len, shim;
+      var ringRamp = 1, grp, gf, oo;   // lines that cross the middle wait for the cluster
+      for(bk = 0; bk < 5; bk++){
+        shim = glow ? 0.86 + 0.14 * act * Math.sin(clock * 4.5 + bk * 1.9) : 1;     // flicker only while tilting
+        for(grp = 0; grp < 2; grp++){
+          gf = grp ? ringRamp : 1;
+          if(gf <= 0) continue;
+          ctx.strokeStyle = EC[bk];
+          ctx.beginPath();
+          for(e = 0; e < K; e += stride){
+            if(eBk[e] !== bk || pAlpha[ka[e]] <= 0 || pAlpha[kb[e]] <= 0) continue;
+            oo = (isOut[ka[e]] && isOut[kb[e]]) ? 1 : 0;
+            if(oo !== grp) continue;
+            ax = sx[ka[e]]; ay = sy[ka[e]]; bx = sx[kb[e]]; by = sy[kb[e]];
+            dx = bx - ax; dy = by - ay; len = Math.sqrt(dx*dx + dy*dy);
+            if(len > maxLen) continue;
+            ctx.moveTo(ax, ay);
+            ctx.quadraticCurveTo((ax + bx) / 2 - dy * bend[e], (ay + by) / 2 + dx * bend[e], bx, by);
+          }
+          if(glow){ ctx.lineWidth = 3.8; ctx.globalAlpha = pal.ea * 0.2 * shim * gf; ctx.stroke(); }
+          else if(pal.soft){ ctx.lineWidth = 4.2; ctx.globalAlpha = pal.ea * 0.22 * gf; ctx.stroke(); }
+          ctx.lineWidth = glow ? 1.05 : 0.9;
+          ctx.globalAlpha = pal.ea * (0.8 + 0.1 * bk) * shim * gf;
+          ctx.stroke();
+        }
+      }
+
+      // the heart contour: no hard line, just a soft glow that follows the outline group
+      var rn = ring.length;
+      if(rn > 2){
+        ctx.beginPath();
+        var p0x = sx[ring[rn-1]], p0y = sy[ring[rn-1]], p1x = sx[ring[0]], p1y = sy[ring[0]];
+        ctx.moveTo((p0x + p1x) / 2, (p0y + p1y) / 2);
+        for(k = 0; k < rn; k++){
+          var A = ring[k], B2 = ring[(k + 1) % rn];
+          ctx.quadraticCurveTo(sx[A], sy[A], (sx[A] + sx[B2]) / 2, (sy[A] + sy[B2]) / 2);
+        }
+        ctx.closePath();
+        if(pal.soft){                                   // day: faint pink bloom inside the heart
+          ctx.globalAlpha = 1; ctx.fillStyle = ca(CC, .06); ctx.fill();
+        }
+        ctx.strokeStyle = CC;
+        var gw = [18, 11, 6, 3], ga = glow ? [.035, .06, .09, .13] : [.05, .08, .12, .16], gi;
+        for(gi = 0; gi < gw.length; gi++){ ctx.lineWidth = gw[gi]; ctx.globalAlpha = ga[gi]; ctx.stroke(); }
+      }
+
+      var col, rd, gs = 1.35 + 0.55 * (1 - Math.exp(-clock / 90));   // points start at default size and grow
+      for(i = 0; i < N; i++){
+        if(!isFinite(sx[i]) || !isFinite(sy[i]) || !isFinite(sd[i])) continue;
+        pa = pAlpha[i] * dA[i]; if(pa <= 0) continue;
+        col = DC[clamp(Math.floor(hid[i] * 4), 0, 3)];
+        rd = clamp(2.1 + sd[i] * 1.6, 1.2, 3.8) * gs * (isOut[i] ? 1.15 : 1) * (0.4 + 0.6 * pa);
+        ctx.fillStyle = col;
+        if(glow){
+          ctx.globalAlpha = 0.16 * pa; ctx.beginPath(); ctx.arc(sx[i], sy[i], rd * 3.0, 0, 6.2832); ctx.fill();
+          ctx.globalAlpha = 0.28 * pa; ctx.beginPath(); ctx.arc(sx[i], sy[i], rd * 1.9, 0, 6.2832); ctx.fill();
+        } else if(pal.soft){
+          var hg = ctx.createRadialGradient(sx[i], sy[i], 0, sx[i], sy[i], rd * 4.2);
+          hg.addColorStop(0, ca(col, .6)); hg.addColorStop(1, ca(col, 0));
+          ctx.globalAlpha = pa; ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(sx[i], sy[i], rd * 4.2, 0, 6.2832); ctx.fill();
+          ctx.fillStyle = col;
+        }
+        ctx.globalAlpha = pal.da * pa;
+        ctx.beginPath(); ctx.arc(sx[i], sy[i], rd, 0, 6.2832); ctx.fill();
+        if(glow && hid[i] > 0.7){ ctx.fillStyle = "#ffffff"; ctx.globalAlpha = 0.9 * pa; ctx.beginPath(); ctx.arc(sx[i], sy[i], rd * 0.45, 0, 6.2832); ctx.fill(); }
+      }
+      if(glow && act > 0.03){                    // sparks run along the curves only while you tilt
+        var sk, mm, uu, px, py, qx, qy, tries, ee, sa = Math.min(1, act * 1.6);
+        for(i = 0; i < SP.length; i++){
+          sk = SP[i];
+          sk.u += dt * sk.v * (0.3 + 1.7 * act);
+          if(sk.u >= 1){
+            sk.u = 0; sk.e = -1;
+            for(tries = 0; tries < 14; tries++){
+              ee = Math.floor(Math.random() * K);
+              dx = sx[kb[ee]] - sx[ka[ee]]; dy = sy[kb[ee]] - sy[ka[ee]]; len = Math.sqrt(dx*dx + dy*dy);
+              if(len <= maxLen && len > 14 && pAlpha[ka[ee]] >= 1 && pAlpha[kb[ee]] >= 1){ sk.e = ee; break; }
+            }
+          }
+          if(sk.e < 0) continue;
+          e = sk.e; ax = sx[ka[e]]; ay = sy[ka[e]]; bx = sx[kb[e]]; by = sy[kb[e]];
+          dx = bx - ax; dy = by - ay;
+          qx = (ax + bx) / 2 - dy * bend[e]; qy = (ay + by) / 2 + dx * bend[e];
+          for(mm = 0; mm < 6; mm++){
+            uu = sk.u - mm * 0.035; if(uu < 0) break;
+            px = (1-uu)*(1-uu)*ax + 2*(1-uu)*uu*qx + uu*uu*bx;
+            py = (1-uu)*(1-uu)*ay + 2*(1-uu)*uu*qy + uu*uu*by;
+            if(mm === 0){ ctx.globalAlpha = .35 * sa; ctx.fillStyle = SC; ctx.beginPath(); ctx.arc(px, py, 8, 0, 6.2832); ctx.fill(); }
+            ctx.globalAlpha = (1 - mm / 6) * 0.95 * sa;
+            ctx.fillStyle = mm === 0 ? "#ffffff" : SC;
+            ctx.beginPath(); ctx.arc(px, py, Math.max(0.8, (mm === 0 ? 2.6 : 2.0 - mm * 0.25)), 0, 6.2832); ctx.fill();
+          }
+        }
+      }
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+    }
+
+    function loop(ts){
+      var dt = last ? Math.min((ts - last) / 1000, .1) : .016; last = ts;
+      clock += dt; acc += dt;
+      var idle = false;                                 // the turning never stops
+      if(!idle || needDraw || acc > (clock < 150 ? 0.045 : 0.15)){          // resting = a still heart, redrawn only a few times a second (growth)
+        var t0 = performance.now();
+        try{ render(acc); }catch(err){ if(window.console) console.warn("bg frame skipped:", err); }
+        acc = 0; needDraw = false;
+        cost += performance.now() - t0; nf++;
+        if(nf === 45){ if(cost / nf > 12 && stride < 3) stride++; cost = 0; nf = 0; }
+      }
+      requestAnimationFrame(loop);
+    }
+
+    // --- tilt input: the iPhone gyro (or the mouse on a computer) ---
+    var motionOn = false, ob = null;
+    function onOri(e){
+      if(e.gamma == null || e.beta == null) return;
+      if(!ob) ob = {b:e.beta, g:e.gamma};
+      ob.b += (e.beta - ob.b) * .0015; ob.g += (e.gamma - ob.g) * .0015;   // slowly re-centres
+      tx = clamp((e.gamma - ob.g) / 30, -1, 1);
+      ty = clamp((e.beta - ob.b) / 30, -1, 1);
+    }
+    api.enable = function(){
+      var D = window.DeviceOrientationEvent;
+      function on(){ window.addEventListener("deviceorientation", onOri); motionOn = true; ob = null; return true; }
+      if(D && typeof D.requestPermission === "function"){
+        return D.requestPermission().then(function(r){ return r === "granted" ? on() : false; });
+      }
+      return Promise.resolve(on());
+    };
+    api.disable = function(){ window.removeEventListener("deviceorientation", onOri); motionOn = false; tx = 0; ty = 0; ob = null; };
+    api.isOn = function(){ return motionOn; };
+    api.supported = ("DeviceOrientationEvent" in window) && !reduce;
+    api.setTheme = function(th){ theme = th === "dark" ? "dark" : "light"; pal = PAL[theme]; needDraw = true; if(reduce) render(.016); };
+    api.frame = function(dt){ render(dt || .016); };
+
+    window.addEventListener("pointermove", function(e){          // computer only: the mouse stands in for tilting
+      if(motionOn || e.pointerType !== "mouse" || W < 2 || H < 2) return;
+      tx = (e.clientX / W - .5) * 2; ty = (e.clientY / H - .5) * 2;
+    });
+    function onScroll(){
+      var m = Math.max(1, document.documentElement.scrollHeight - window.innerHeight), y = window.scrollY || document.documentElement.scrollTop || 0;
+      tprog = clamp(y / m, 0, 1);
+      if(m > 40 && m - y <= 24) mode = 1;          // bottom reached: from here the snake heads back up the left-hand side
+      else if(y <= 24) mode = 0;                   // back at the top: the next trip goes down the right again
+    }
+    if(!reduce){ window.addEventListener("scroll", onScroll, {passive:true}); window.addEventListener("resize", onScroll); onScroll(); prog = tprog; }
+    api.setProgress = function(v, m){ tprog = prog = clamp(v, 0, 1); if(m != null) mode = m; sS = null; needDraw = true; };
+    window.addEventListener("resize", resize);
+    resize();
+    if(reduce) render(.016); else requestAnimationFrame(loop);
+    return api;
+  })();
+
+  /* ---------- Tabs ---------- */
+  var tabs = document.querySelectorAll("nav button");
+  var logReady = false;
+  function showTab(name){
+    if(["plates","log","conv"].indexOf(name) < 0) name = "plates";
+    tabs.forEach(function(b){ b.setAttribute("aria-selected", b.dataset.tab === name ? "true" : "false"); });
+    ["plates","log","conv"].forEach(function(id){ document.getElementById(id).hidden = (id !== name); });
+    if(name === "log" && logReady) renderLog();
+    try{ localStorage.setItem("gymcalc.tab", name); }catch(e){}
+  }
+  tabs.forEach(function(b){ b.addEventListener("click", function(){ showTab(b.dataset.tab); }); });
+  try{ var saved = localStorage.getItem("gymcalc.tab"); if(saved) showTab(saved); }catch(e){}
+
+  /* ---------- Theme (pastel by default, plum night mode) ---------- */
+  var modeBtn = document.getElementById("modeBtn");
+  function setTheme(t){
+    if(t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    else document.documentElement.removeAttribute("data-theme");
+    modeBtn.setAttribute("aria-pressed", String(t === "dark"));
+    modeBtn.textContent = t === "dark" ? "Day" : "Night";
+    Bg.setTheme(t);
+    try{ localStorage.setItem("gymcalc.theme", t); }catch(e){}
+  }
+  var th = "light";
+  try{ th = localStorage.getItem("gymcalc.theme") || "light"; }catch(e){}
+  setTheme(th);
+  modeBtn.addEventListener("click", function(){
+    setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+  });
+
+  var motionBtn = document.getElementById("motionBtn");
+  if(!Bg.supported) motionBtn.hidden = true;
+  function motionUI(on){ motionBtn.setAttribute("aria-pressed", String(on)); motionBtn.textContent = on ? "Tilt on" : "Tilt"; }
+  motionBtn.addEventListener("click", function(){
+    if(Bg.isOn()){ Bg.disable(); motionUI(false); return; }
+    Bg.enable().then(function(ok){
+      if(ok) motionUI(true); else motionBtn.textContent = "Tilt blocked";
+    }).catch(function(){ motionBtn.textContent = "Tilt n/a"; });
+  });
+
+  var askedTilt = false;
+  document.addEventListener("click", function(ev){
+    if(askedTilt || !Bg.supported || Bg.isOn() || (ev.target && ev.target.closest && ev.target.closest("#motionBtn"))) return;
+    askedTilt = true;
+    Bg.enable().then(function(ok){ if(ok) motionUI(true); }).catch(function(){});
+  }, true);
+
+  /* ---------- Converter ---------- */
+  var pairs = [
+    {a:"lb", b:"kg", ab:function(x){return x/LB_PER_KG;}, ba:function(x){return x*LB_PER_KG;}},
+    {a:"mi", b:"km", ab:function(x){return x*1.609344;}, ba:function(x){return x/1.609344;}},
+    {a:"in", b:"cm", ab:function(x){return x*2.54;}, ba:function(x){return x/2.54;}},
+    {a:"ft", b:"m",  ab:function(x){return x*0.3048;}, ba:function(x){return x/0.3048;}},
+    {a:"°F", b:"°C", ab:function(x){return (x-32)*5/9;}, ba:function(x){return x*9/5+32;}}
+  ];
+  var conv = document.getElementById("conv");
+  pairs.forEach(function(p, i){
+    var row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML =
+      '<div class="fld"><input type="text" id="a'+i+'" aria-label="'+p.a+'" inputmode="decimal" autocomplete="off" placeholder="0"><span class="unit">'+p.a+'</span></div>' +
+      '<div class="fld"><input type="text" id="b'+i+'" aria-label="'+p.b+'" inputmode="decimal" autocomplete="off" placeholder="0"><span class="unit">'+p.b+'</span></div>';
+    conv.appendChild(row);
+    var A = row.querySelector("#a"+i), B = row.querySelector("#b"+i);
+    A.addEventListener("input", function(){ var v = num(A.value); B.value = isNaN(v) ? "" : fmt(p.ab(v)); });
+    B.addEventListener("input", function(){ var v = num(B.value); A.value = isNaN(v) ? "" : fmt(p.ba(v)); });
+  });
+
+  /* ---------- Segmented helper ---------- */
+  function seg(el, options, getVal, onPick){
+    el.innerHTML = "";
+    options.forEach(function(o){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = o.label;
+      b.setAttribute("aria-pressed", String(getVal() === o.value));
+      b.addEventListener("click", function(){ onPick(o.value); });
+      el.appendChild(b);
+    });
+  }
+
+  /* ---------- Plates ---------- */
+  var SETS = {
+    lb: {plates:[45,35,25,10,5,2.5], bars:[45,35,33], colors:{
+      "45":["#3a6bff","#ffffff"],"35":["#9a5bff","#ffffff"],"25":["#00d7ff","#04122a"],"10":["#d4f1ff","#04122a"],"5":["#28f0b0","#04122a"],"2.5":["#7a8cff","#ffffff"]}},
+    kg: {plates:[25,20,15,10,5,2.5,1.25], bars:[20,15], colors:{
+      "25":["#3a6bff","#ffffff"],"20":["#9a5bff","#ffffff"],"15":["#00d7ff","#04122a"],"10":["#d4f1ff","#04122a"],"5":["#28f0b0","#04122a"],"2.5":["#7a8cff","#ffffff"],"1.25":["#b9c4ff","#04122a"]}}
+  };
+  var P = {unit:"lb", mode:"side", bar:45, halo:false, counts:{lb:{}, kg:{}}};   // each + is a pair: one plate per side
+
+  function plateTotal(){
+    var set = SETS[P.unit], sum = 0, parts = [];
+    set.plates.forEach(function(w){
+      var c = P.counts[P.unit][w] || 0;
+      if(c){ sum += c*w; parts.push(c+" × "+w); }
+    });
+    var total = sum*2 + P.bar;                       // every + is 2 plates, so double it behind the scenes
+    var why = parts.length ? parts.join(" + ") + " each side" : "Tap + to add a pair of plates (one each side)";
+    if(parts.length && P.bar) why += " + " + P.bar + " bar";
+    return {total:total, why:why};
+  }
+
+  /* ---------- Barbell drawing ---------- */
+  var DEFS =
+    '<defs>' +
+    // mirror-polished chrome for bar and sleeves
+    '<linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262b30"/><stop offset=".12" stop-color="#97a0a7"/><stop offset=".22" stop-color="#ffffff"/><stop offset=".32" stop-color="#c7ced3"/><stop offset=".45" stop-color="#6b7278"/><stop offset=".58" stop-color="#a9b1b7"/><stop offset=".70" stop-color="#e9eef1"/><stop offset=".85" stop-color="#788087"/><stop offset="1" stop-color="#1f2327"/></linearGradient>' +
+    '<linearGradient id="steel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#15181b"/><stop offset=".2" stop-color="#7d868c"/><stop offset=".38" stop-color="#d4dadf"/><stop offset=".6" stop-color="#4c5359"/><stop offset=".8" stop-color="#8f979d"/><stop offset="1" stop-color="#121417"/></linearGradient>' +
+    // gunmetal layer that gives coloured plates a metal body
+    '<linearGradient id="steelOv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f353a"/><stop offset=".2" stop-color="#d3dade"/><stop offset=".4" stop-color="#868e94"/><stop offset=".6" stop-color="#454b51"/><stop offset=".8" stop-color="#9aa2a8"/><stop offset="1" stop-color="#1f2326"/></linearGradient>' +
+    // specular highlights + falloff
+    '<linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset=".09" stop-color="#fff" stop-opacity=".80"/><stop offset=".19" stop-color="#fff" stop-opacity=".12"/><stop offset=".32" stop-color="#fff" stop-opacity=".32"/><stop offset=".52" stop-color="#000" stop-opacity=".06"/><stop offset=".78" stop-color="#000" stop-opacity=".32"/><stop offset=".90" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity=".72"/></linearGradient>' +
+    // fine turned-metal lines around the plate edge
+    '<pattern id="brush" width="1.6" height="10" patternUnits="userSpaceOnUse"><line x1=".4" y1="0" x2=".4" y2="10" stroke="#fff" stroke-opacity=".14" stroke-width=".5"/></pattern>' +
+    '<pattern id="knurl" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="3" stroke="#000" stroke-opacity=".55" stroke-width="1"/></pattern>' +
+    '<radialGradient id="floor"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>' +
+    '<filter id="haloBlur" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="172"><feGaussianBlur stdDeviation="5"/></filter>' +
+    '<filter id="heartSoft0" filterUnits="userSpaceOnUse" x="-20" y="-20" width="440" height="212"><feGaussianBlur stdDeviation=".9"/></filter>' +
+    '<filter id="heartSoft1" filterUnits="userSpaceOnUse" x="-20" y="-20" width="440" height="212"><feGaussianBlur stdDeviation="1.5"/></filter>' +
+    '<filter id="heartSoft2" filterUnits="userSpaceOnUse" x="-20" y="-20" width="440" height="212"><feGaussianBlur stdDeviation="2.2"/></filter>' +
+    '<radialGradient id="heartGrad" cx="50%" cy="40%" r="65%"><stop offset="0" style="stop-color:var(--accent)" stop-opacity=".8"/><stop offset="1" style="stop-color:var(--strong)" stop-opacity=".45"/></radialGradient>' +
+    '</defs>';
+
+  var CY = 85;            // bar centre line
+  var FL = 88, FR = 312; // inner faces where plates rest (short sleeves, long shaft)
+  var AVAIL = 64;        // room for plates on each sleeve
+
+  function renderViz(){
+    var set = SETS[P.unit], el = document.getElementById("pViz");
+    var pct = P.unit === "lb"
+      ? {"45":100,"35":88,"25":74,"10":58,"5":44,"2.5":34}
+      : {"25":100,"20":100,"15":90,"10":78,"5":60,"2.5":46,"1.25":36};
+    var thick = P.unit === "lb"
+      ? {"45":10,"35":8.5,"25":7,"10":6,"5":4.5,"2.5":3.5}
+      : {"25":11,"20":10,"15":9,"10":7.5,"5":5.5,"2.5":4.5,"1.25":3.5};
+    var L = [], R = [], odd = [];
+    set.plates.forEach(function(w){
+      var c = P.counts[P.unit][w] || 0, l, r, i;
+      if(!c) return;
+      if(P.mode === "side"){ l = c; r = c; }
+      else { l = Math.ceil(c/2); r = Math.floor(c/2); if(c % 2) odd.push(w); }
+      for(i = 0; i < l; i++) L.push(w);
+      for(i = 0; i < r; i++) R.push(w);
+    });
+    function tot(a){ return a.reduce(function(s,w){ return s + thick[w] + 0.8; }, 0); }
+    var k = Math.min(1, AVAIL / Math.max(tot(L), tot(R), 1));
+
+    function draw(arr, startX, dir){
+      var x = startX, out = "";
+      arr.forEach(function(w){
+        var t = Math.max(2.2, thick[w]*k), h = pct[w]*1.5, col = set.colors[String(w)][0];
+        var rx = dir < 0 ? x - t : x, ry = CY - h/2;
+        var X = rx.toFixed(2), Y = ry.toFixed(2), W = t.toFixed(2), H = h.toFixed(2);
+        out += '<rect x="'+X+'" y="'+Y+'" width="'+W+'" height="'+H+'" rx="2.2" fill="'+col+'" stroke="rgba(0,0,0,.7)" stroke-width=".7"/>' +
+               '<rect x="'+X+'" y="'+Y+'" width="'+W+'" height="'+H+'" rx="2.2" fill="url(#steelOv)" opacity=".26"/>' +
+               '<rect x="'+X+'" y="'+Y+'" width="'+W+'" height="'+H+'" rx="2.2" fill="url(#brush)"/>' +
+               '<rect x="'+X+'" y="'+Y+'" width="'+W+'" height="'+H+'" rx="2.2" fill="url(#shine)"/>' +
+               '<rect x="'+(rx+.6).toFixed(2)+'" y="'+(ry+.6).toFixed(2)+'" width="'+Math.max(t-1.2,.5).toFixed(2)+'" height="'+(h-1.2).toFixed(2)+'" rx="1.8" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width=".5"/>';
+        if(t > 5){
+          var r1 = (rx + t*0.22).toFixed(2), r2 = (rx + t*0.78).toFixed(2);
+          out += '<line x1="'+r1+'" y1="'+(ry+2).toFixed(2)+'" x2="'+r1+'" y2="'+(ry+h-2).toFixed(2)+'" stroke="#000" stroke-opacity=".45" stroke-width=".6"/>' +
+                 '<line x1="'+r2+'" y1="'+(ry+2).toFixed(2)+'" x2="'+r2+'" y2="'+(ry+h-2).toFixed(2)+'" stroke="#000" stroke-opacity=".45" stroke-width=".6"/>' +
+                 '<line x1="'+(rx + t*0.22 + .7).toFixed(2)+'" y1="'+(ry+2).toFixed(2)+'" x2="'+(rx + t*0.22 + .7).toFixed(2)+'" y2="'+(ry+h-2).toFixed(2)+'" stroke="#fff" stroke-opacity=".3" stroke-width=".5"/>';
+        }
+        x += dir*(t + 0.8*k);
+      });
+      return {svg: out, end: x};
+    }
+    function collar(x, dir){
+      // lock collar sits just outside the last plate
+      var w = 9, rx = dir < 0 ? x - w : x;
+      return '<rect x="'+rx.toFixed(2)+'" y="'+(CY-13)+'" width="'+w+'" height="26" rx="2" fill="#17191b" stroke="#000" stroke-width=".6"/>' +
+             '<rect x="'+rx.toFixed(2)+'" y="'+(CY-13)+'" width="'+w+'" height="26" rx="2" fill="url(#shine)" opacity=".55"/>' +
+             '<circle cx="'+(rx + w/2).toFixed(2)+'" cy="'+(CY-7)+'" r="2" fill="url(#steel)"/>';
+    }
+    function summ(arr){
+      var m = {}, order = [];
+      arr.forEach(function(w){ if(!m[w]){ m[w] = 0; order.push(w); } m[w]++; });
+      return order.map(function(w){ return m[w] + " × " + w; }).join(" + ");
+    }
+
+    var barOp = P.bar === 0 ? ".28" : "1";
+    var bar =
+      '<g opacity="'+barOp+'">' +
+        // sleeves
+        '<rect x="12" y="'+(CY-8)+'" width="80" height="16" rx="2" fill="url(#chrome)"/>' +
+        '<rect x="308" y="'+(CY-8)+'" width="80" height="16" rx="2" fill="url(#chrome)"/>' +
+        // sleeve end caps + groove
+        '<rect x="8" y="'+(CY-7)+'" width="7" height="14" rx="2.5" fill="url(#steel)"/>' +
+        '<rect x="385" y="'+(CY-7)+'" width="7" height="14" rx="2.5" fill="url(#steel)"/>' +
+        '<rect x="19" y="'+(CY-8)+'" width="1.5" height="16" fill="#000" opacity=".35"/>' +
+        '<rect x="379.5" y="'+(CY-8)+'" width="1.5" height="16" fill="#000" opacity=".35"/>' +
+        // shaft
+        '<rect x="92" y="'+(CY-4.5)+'" width="216" height="9" fill="url(#chrome)"/>' +
+        // knurled grip (smooth centre band)
+        '<rect x="132" y="'+(CY-4.5)+'" width="60" height="9" fill="url(#knurl)"/>' +
+        '<rect x="208" y="'+(CY-4.5)+'" width="60" height="9" fill="url(#knurl)"/>' +
+        '<rect x="124" y="'+(CY-4.5)+'" width="2" height="9" fill="#000" opacity=".45"/>' +
+        '<rect x="274" y="'+(CY-4.5)+'" width="2" height="9" fill="#000" opacity=".45"/>' +
+        // inner collar flanges
+        '<rect x="'+(FL-1)+'" y="'+(CY-19)+'" width="9" height="38" rx="2" fill="url(#steel)" stroke="#000" stroke-width=".6"/>' +
+        '<rect x="'+(FR-8)+'" y="'+(CY-19)+'" width="9" height="38" rx="2" fill="url(#steel)" stroke="#000" stroke-width=".6"/>' +
+      '</g>';
+
+    var left = draw(L, FL - 1, -1), right = draw(R, FR + 1, 1);
+    var collars = "";
+    if(L.length && P.bar) collars += collar(left.end - 0.5, -1);
+    if(R.length && P.bar) collars += collar(right.end + 0.5, 1);
+
+    var halo = "";
+    if(P.halo){
+      P.halo = false;
+      var HEART = "M0 4C-7 -1 -5 -7 -1.8 -7C-0.8 -7 0 -6.2 0 -5.4C0 -6.2 0.8 -7 1.8 -7C5 -7 7 -1 0 4Z";
+      var barR = {x:8, y:CY-22, w:384, h:44};          // bar glow, 44 tall (double the old 22)
+      var stacks = [];
+      var tallest = function(arr){ return arr.reduce(function(m,w){ return Math.max(m, pct[w]*1.5); }, 0); };
+      if(L.length){ var hL = tallest(L) + 16; stacks.push({side:"L", x:left.end-12, y:CY-hL/2, w:(FL-1)-(left.end-12)+9, h:hL}); }
+      if(R.length){ var hR = tallest(R) + 16; stacks.push({side:"R", x:FR-8, y:CY-hR/2, w:(right.end+12)-(FR-8), h:hR}); }
+      var box = function(r, rad){ return '<rect x="'+r.x.toFixed(1)+'" y="'+r.y.toFixed(1)+'" width="'+r.w.toFixed(1)+'" height="'+r.h.toFixed(1)+'" rx="'+rad+'" fill="var(--accent)"/>'; };
+      var glow = '<g class="halo-glow">' + box(barR, 22) + stacks.map(function(r){ return box(r, 14); }).join("") + '</g>';
+
+      var n = 0, layer = 0, hearts = ["", "", ""];
+      var heart = function(x, y, dx, dy){
+        var sc = (0.75 + ((n*7) % 5) * 0.1) * (1 - layer*0.12);
+        var dl = ((n*37) % 10) * 0.06 + layer*0.12;
+        var op = [0.85, 0.6, 0.4][layer];
+        var ox = dx ? (dx > 0 ? 1 : -1) * layer * 5 : 0, oy = dy ? (dy > 0 ? 1 : -1) * layer * 5 : 0;
+        var k2 = 1 + layer*0.3;
+        n++;
+        return '<g transform="translate('+(x+ox).toFixed(1)+' '+(y+oy).toFixed(1)+') scale('+sc.toFixed(2)+')"><path class="halo-heart" d="'+HEART+'" fill="url(#heartGrad)" fill-opacity="'+op+'" style="--dx:'+(dx*k2).toFixed(1)+'px;--dy:'+(dy*k2).toFixed(1)+'px;animation-delay:'+dl.toFixed(2)+'s"/></g>';
+      };
+      var inStack = function(x){ return stacks.some(function(r){ return x > r.x - 6 && x < r.x + r.w + 6; }); };
+      var xx, yy, h, ph, pv;
+      for(layer = 0; layer < 3; layer++){
+        ph = layer * 9;   // layers are shifted so they interleave instead of stacking
+        pv = layer * 5;
+        h = "";
+        // along the bar (skipping the parts hidden behind the plate stacks)
+        for(xx = barR.x + 14 + ph; xx <= barR.x + barR.w - 14; xx += 28){
+          if(!inStack(xx)) h += heart(xx, barR.y - 1, 0, -6);
+          if(!inStack(xx + 14)) h += heart(xx + 14, barR.y + barR.h + 1, 0, 6);
+        }
+        if(!L.length){ for(yy = barR.y + 8 + pv; yy <= barR.y + barR.h - 8; yy += 14) h += heart(barR.x - 2, yy, -6, 0); }
+        if(!R.length){ for(yy = barR.y + 8 + pv; yy <= barR.y + barR.h - 8; yy += 14) h += heart(barR.x + barR.w + 2, yy, 6, 0); }
+        // around each plate stack: top, bottom and the outer end
+        stacks.forEach(function(r){
+          for(xx = r.x + 8 + pv; xx <= r.x + r.w - 8; xx += 16){
+            h += heart(xx, r.y - 1, 0, -6) + heart(xx, r.y + r.h + 1, 0, 6);
+          }
+          var ox = r.side === "L" ? r.x - 1 : r.x + r.w + 1, dxo = r.side === "L" ? -6 : 6;
+          for(yy = r.y + 14 + pv; yy <= r.y + r.h - 14; yy += 20) h += heart(ox, yy, dxo, 0);
+        });
+        hearts[layer] = h;
+      }
+      halo = '<g filter="url(#haloBlur)" style="pointer-events:none">' + glow + '</g>' +
+             '<g filter="url(#heartSoft0)" style="pointer-events:none">' + hearts[0] + '</g>' +
+             '<g filter="url(#heartSoft1)" style="pointer-events:none">' + hearts[1] + '</g>' +
+             '<g filter="url(#heartSoft2)" style="pointer-events:none">' + hearts[2] + '</g>';
+    }
+    var svg = '<svg viewBox="0 0 400 172" role="img" aria-label="Barbell with plates loaded">' + DEFS +
+      '<ellipse cx="200" cy="166" rx="190" ry="5" fill="url(#floor)"/>' +
+      halo + bar + left.svg + right.svg + collars +
+      '<text x="200" y="'+(CY+30)+'" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--body)">' +
+      (P.bar ? P.bar + " " + P.unit + " bar" : "no bar") + '</text></svg>';
+
+    var cap, warn = false;
+    if(!L.length && !R.length) cap = "";
+    else if(P.mode === "all" && odd.length){ cap = "Uneven: odd number of " + odd.join(", ") + " plates, so one side has an extra"; warn = true; }
+    else cap = "Each side: " + summ(L);
+    el.innerHTML = svg + '<div class="cap' + (warn ? ' warn' : '') + '">' + cap + '</div>';
+  }
+
+  function renderPlates(){
+    var set = SETS[P.unit];
+    renderViz();
+    seg(document.getElementById("pBarSeg"), set.bars.map(function(b){ return {label: b+" "+P.unit, value:b}; }),
+      function(){return P.bar;}, function(v){ P.bar = v; P.halo = true; renderPlates(); });
+
+    var list = document.getElementById("pList");
+    list.innerHTML = "";
+    set.plates.forEach(function(w){
+      var c = P.counts[P.unit][w] || 0;
+      var col = set.colors[String(w)];
+      var row = document.createElement("div");
+      row.className = "plate";
+      row.innerHTML =
+        '<div class="chip" style="background:'+hexA(col[0], .16)+';border:1.5px solid '+hexA(col[0], .95)+';color:var(--ink);box-shadow:0 0 10px '+hexA(col[0], .35)+'">'+w+'</div>' +
+        '<div class="pl2">'+(c ? (c*2)+' plates' : '')+'</div>' +
+        '<div class="step"><button type="button" aria-label="Remove a pair of '+w+' plates">−</button><output>'+c+'</output><button type="button" aria-label="Add a pair of '+w+' plates">+</button></div>';
+      var btns = row.querySelectorAll("button");
+      btns[0].addEventListener("click", function(){ P.counts[P.unit][w] = Math.max(0, (P.counts[P.unit][w]||0) - 1); renderPlates(); });
+      btns[1].addEventListener("click", function(){ P.counts[P.unit][w] = (P.counts[P.unit][w]||0) + 1; P.halo = true; renderPlates(); });
+      list.appendChild(row);
+    });
+
+    updateResult();
+    updateLift();
+  }
+  document.getElementById("pReset").addEventListener("click", function(){ P.counts[P.unit] = {}; renderPlates(); });
+  document.getElementById("barChk").addEventListener("change", function(){
+    var on = this.checked;
+    document.getElementById("pBarSeg").hidden = !on;
+    if(!on){ P.bar = SETS[P.unit].bars[0]; P.halo = true; renderPlates(); }       // unticked = the standard 45 lb bar
+  });
+
+  /* ---------- Equipment: barbell, EZ bar, dumbbell, machine ---------- */
+  var E = {type:"barbell", ez:30, db:25, hands:2, machine:50};
+  var EQ = [{id:"barbell", label:"Barbell"}, {id:"db", label:"Dumbbell"}, {id:"machine", label:"Machine"}, {id:"ez", label:"EZ bar"}];
+  function eqLabel(id){ for(var q = 0; q < EQ.length; q++) if(EQ[q].id === id) return EQ[q].label; return id; }
+  function getLoad(){
+    if(E.type === "barbell"){ var r = plateTotal(); return {total:r.total, unit:P.unit, why:r.why}; }
+    if(E.type === "ez") return {total:E.ez, unit:"lb", why:"EZ bar · " + E.ez + " lb (fixed weight, the number is the whole bar)"};
+    if(E.type === "db") return {total:E.db * E.hands, unit:"lb", perHand:E.db, hands:E.hands,
+      why:E.db + " lb each hand" + (E.hands === 2 ? " × 2 hands" : ", one hand at a time")};
+    return {total:E.machine, unit:"lb", why:"Machine stack · " + E.machine + " lb"};
+  }
+  function updateResult(){}   // the big total card was removed; weight and kg now live in the Weight box
+
+  /* ---------- Exercises and the muscles they hit (general estimates) ---------- */
+  var AREA_ORDER = ["Chest", "Back", "Shoulders", "Arms", "Lower body", "Glutes"];
+  var EX = {
+    barbell:{"Chest":["Bench press"], "Back":["Barbell row","Deadlift"], "Lower body":["Squat","Front squat","Hip thrust","Lunge"], "Glutes":["Hip thrust","Glute bridge"]},
+    ez:{"Arms":["Bicep curl","Skull crusher"]},
+    db:{"Chest":["Chest press"], "Shoulders":["Shoulder press","Lateral raise"], "Arms":["Hammer curl"]},
+    machine:{"Back":["Lat pulldown","Low row"], "Arms":["Tricep pulldown"], "Lower body":["Leg press"]}
+  };
+  var MUS = {
+    "barbell|Bench press":   {p:["chest"], s:["fdelt","triceps"]},
+    "barbell|Barbell row":   {p:["lats","rhom"], s:["traps","rdelt","biceps","lback","forearms"]},
+    "barbell|Deadlift":      {p:["glutes","hams","lback"], s:["quads","lats","traps","forearms","abs"]},
+    "barbell|Squat":         {p:["quads","glutes"], s:["hams","adductors","lback","abs"]},
+    "barbell|Front squat":   {p:["quads"], s:["glutes","adductors","abs","lback"]},
+    "barbell|Hip thrust":    {p:["glutes"], s:["hams","adductors"]},
+    "barbell|Lunge":         {p:["quads","glutes"], s:["hams","adductors","calves"]},
+    "barbell|Glute bridge":  {p:["glutes"], s:["hams"]},
+    "ez|Bicep curl":         {p:["biceps"], s:["brachialis","forearms"]},
+    "ez|Skull crusher":      {p:["triceps"], s:["forearms"]},
+    "db|Chest press":        {p:["chest"], s:["fdelt","triceps"]},
+    "db|Shoulder press":     {p:["fdelt","sdelt"], s:["triceps","traps"]},
+    "db|Lateral raise":      {p:["sdelt"], s:["traps","fdelt"]},
+    "db|Hammer curl":        {p:["brachialis","biceps"], s:["forearms"]},
+    "machine|Lat pulldown":  {p:["lats"], s:["biceps","rhom","rdelt","forearms"]},
+    "machine|Low row":       {p:["lats","rhom"], s:["traps","rdelt","biceps","forearms","lback"]},
+    "machine|Tricep pulldown":{p:["triceps"], s:["forearms"]},
+    "machine|Leg press":     {p:["quads","glutes"], s:["hams","adductors","calves"]}
+  };
+  var AREA_MUS = {
+    "Chest":{p:["chest"], s:["fdelt","triceps"]}, "Back":{p:["lats","rhom"], s:["biceps","traps"]},
+    "Shoulders":{p:["fdelt","sdelt"], s:["triceps","traps"]}, "Arms":{p:["biceps","triceps"], s:["brachialis","forearms"]},
+    "Lower body":{p:["quads","glutes"], s:["hams","calves","adductors"]}, "Glutes":{p:["glutes"], s:["hams"]}
+  };
+  // handles change the emphasis, they don't switch muscles on or off
+  var ATT = {
+    "machine|Low row":[
+      {id:"close", label:"Close-grip handle", p:["lats"], s:["rhom","biceps","traps","rdelt","forearms","lback"],
+       note:"Close neutral grip, elbows tucked: leans toward the lats (lower lats) and the biceps."},
+      {id:"straight", label:"Straight bar (diamond grip)", p:["lats","rhom"], s:["traps","rdelt","biceps","forearms","lback"],
+       note:"Straight bar about shoulder width: an even mix of lats and mid-back. Palms up adds more biceps."},
+      {id:"wide", label:"Wide bar", p:["rhom","rdelt"], s:["lats","traps","biceps","forearms","lback"],
+       note:"Wide overhand grip with elbows out: shifts toward the upper back and rear shoulders."}
+    ],
+    "machine|Lat pulldown":[
+      {id:"wide", label:"Wide bar", p:["lats"], s:["rhom","rdelt","biceps","forearms","traps"],
+       note:"Wide overhand grip: the classic lat-width pull, a little less biceps."},
+      {id:"close", label:"Close-grip handle", p:["lats"], s:["biceps","rhom","forearms","rdelt"],
+       note:"Close neutral grip: lets you pull lower, so more lower lats and biceps."}
+    ],
+    "machine|Tricep pulldown":[
+      {id:"rope", label:"Rope", p:["triceps"], s:["forearms"], note:"Rope: you can spread the ends at the bottom for a harder squeeze."},
+      {id:"bar", label:"Straight bar", p:["triceps"], s:["forearms"], note:"Straight bar: easiest to load heavier."},
+      {id:"vbar", label:"V-bar", p:["triceps"], s:["forearms"], note:"V-bar: neutral grip that is easy on the wrists."}
+    ]
+  };
+  var OLD_LABELS = {"Upper: Chest":"Chest", "Upper: Back":"Back"};   // entries recorded before the rename
+  function areaName(x){ return OLD_LABELS[x] || x; }
+  var MN = {chest:"Chest", fdelt:"Front shoulders", sdelt:"Side shoulders", rdelt:"Rear shoulders", biceps:"Biceps", brachialis:"Brachialis", triceps:"Triceps",
+    forearms:"Forearms", abs:"Core", obliques:"Obliques", quads:"Quads", adductors:"Inner thigh", traps:"Traps", rhom:"Upper back",
+    lats:"Lats", lback:"Lower back", glutes:"Glutes", hams:"Hamstrings", calves:"Calves"};
+  function mnames(ids){ return (ids || []).map(function(x){ return MN[x] || x; }).join(", "); }
+
+  var L = {area:null, ex:null, att:null};
+  var eqSeg = document.getElementById("eqSeg"), bbCtl = document.getElementById("bbCtl"), pVizEl = document.getElementById("pViz");
+  var fxCard = document.getElementById("fxCard"), fxBody = document.getElementById("fxBody"), fxLabel = document.getElementById("fxLabel");
+  var lArea = document.getElementById("lArea"), lEx = document.getElementById("lEx"), lExOther = document.getElementById("lExOther");
+  var lAttWrap = document.getElementById("lAttWrap"), lAtt = document.getElementById("lAtt");
+  var lReps = document.getElementById("lReps"), lSets = document.getElementById("lSets"), lNote = document.getElementById("lNote");
+  lVolBig = document.getElementById("lVolBig"), lVolSub = document.getElementById("lVolSub");
+  var lMsg = document.getElementById("lMsg"), lRec = document.getElementById("lRec"), msgTimer = null;
+  var mMap = document.getElementById("mMap"), mLegend = document.getElementById("mLegend"), mNote = document.getElementById("mNote");
+
+  function currentAtt(){
+    var list = L.ex && ATT[E.type + "|" + L.ex];
+    if(!list || !L.att) return null;
+    for(var q = 0; q < list.length; q++) if(list[q].id === L.att) return list[q];
+    return null;
+  }
+  function tidy(p, s){ return {p:p.slice(), s:s.filter(function(x){ return p.indexOf(x) < 0; })}; }
+  function getMuscles(){
+    var att = currentAtt();
+    if(att) return tidy(att.p, att.s);
+    var m = (L.ex && L.ex !== "Other") ? MUS[E.type + "|" + L.ex] : null;
+    if(m) return tidy(m.p, m.s);
+    if(L.area && AREA_MUS[L.area]) return tidy(AREA_MUS[L.area].p, AREA_MUS[L.area].s);
+    return {p:[], s:[]};
+  }
+
+  /* ---------- Muscle map: only the working muscles are lit ---------- */
+  // outline drawn from proportions, a touch slimmer than life with a smaller waist
+  var BODY = ["M103.5 55.5 C104.5 55.8 106.8 56.5 109.5 57.5 C112.2 58.5 115.8 59.8 120 61.5 C124.2 63.2 131.6 66.1 134.6 67.5 C137.6 68.9 138.1 67.2 137.9 70 C137.7 72.8 134.1 79.7 133.4 84 C132.6 88.3 134.3 91.7 133.4 96 C132.4 100.3 129.2 104.3 127.7 110 C126.1 115.7 123.9 124.1 124.1 129.9 C124.2 135.8 127 141.2 128.6 145 C130.2 148.8 132.4 150.4 133.8 152.8 C135.3 155.2 136.4 157.2 137.1 159.3 C137.8 161.5 138 163 138 165.9 C138.1 168.7 137.9 171.9 137.5 176.2 C137.1 180.6 136.6 185.6 135.6 192.1 C134.7 198.6 132.8 207.1 131.6 215.2 C130.5 223.3 129 232.6 128.6 240.7 C128.3 248.8 129.9 255.7 129.4 263.8 C128.9 271.9 127.1 281.1 125.6 289.2 C124.2 297.3 121.2 306.9 120.6 312.3 C120.1 317.7 121.4 318.7 122.5 321.6 C123.6 324.5 126.2 327.2 127 329.7 C127.8 332.2 128.3 335 127.5 336.6 C126.7 338.2 124.3 339 122 339.5 C119.7 340 115.6 340.2 113.5 339.5 C111.4 338.8 110 337.9 109.5 335.5 C109 333 110 328.9 110.5 325 C111 321.2 112.9 318.3 112.8 312.3 C112.7 306.4 110.7 296.9 109.8 289.2 C108.9 281.5 107.6 273.8 107.2 266.1 C106.8 258.4 107.8 248.8 107.4 243 C107 237.2 105.9 235.3 105 231.4 C104.1 227.6 102.9 224.5 102.2 219.9 C101.5 215.2 101.2 209.4 100.9 203.7 C100.6 197.9 100.7 188.3 100.6 185.5 C100.5 182.7 100.5 187 100.5 187 C100.4 187 100.3 185.8 100.1 185.4 C99.9 185.1 99.5 185.1 99.4 185 L99.2 185 L99.2 57 Z",
+    "M141.3 69.2 C142.5 71.8 143.8 76.1 144.7 79.5 C145.6 83 146.2 86.5 146.7 89.9 C147.2 93.4 147.4 96.8 147.7 100.2 C148.1 103.6 148.4 106.9 148.8 110.1 C149.1 113.4 149.5 116.6 149.9 119.7 C150.2 122.9 150.4 126 150.7 129 C151 132.1 151.1 135.1 151.6 138 C152.1 141 153.1 143.8 153.5 146.6 C153.8 149.5 153.7 152.3 153.7 155.1 C153.7 157.9 153.6 160.7 153.5 163.3 C153.4 166 153.2 168.7 153 171.3 C152.9 173.9 152.7 176.4 152.4 178.9 C152.2 181.4 151.9 183.9 151.6 186.2 C151.3 188.6 152.1 192.2 150.6 193.3 C149.1 194.4 144 193.9 142.6 192.7 C141.3 191.5 142.5 188.2 142.3 185.9 C142.2 183.6 142 181.3 141.8 178.9 C141.6 176.5 141.3 174.1 141 171.6 C140.7 169.2 140.3 166.7 139.9 164.1 C139.4 161.6 139 159 138.5 156.4 C138.1 153.8 137.4 151.1 137.1 148.4 C136.9 145.7 137.3 142.8 137 140 C136.7 137.1 136 134.3 135.4 131.4 C134.7 128.5 134 125.6 133.2 122.6 C132.5 119.7 131.7 116.7 130.9 113.6 C130 110.6 129 107.5 128 104.4 C127 101.3 125.7 98.2 124.6 95 C123.6 91.8 122.6 88.6 121.8 85.2 C121 81.8 120.1 77.6 119.9 74.8 C119.7 72 119.6 70.4 120.4 68.5 C121.2 66.6 123 64.6 124.8 63.5 C126.7 62.4 129.3 61.7 131.4 61.8 C133.6 61.8 136.1 62.7 137.7 63.9 C139.4 65.2 140.1 66.6 141.3 69.2 Z",
+    "M141.7 192.6 L139.3 200.3 L136.9 208.8 L136.8 211 L136.7 213.1 L136.6 215.3 L136.6 217.4 L136.6 219.6 L137.2 221.8 L137.9 222.7 L138.6 221.9 L139.3 219.8 L139.6 217.7 L139.9 215.5 L140.3 213.4 L140.6 211.3 L141.1 209.1 L140.8 210.6 L140.8 213.3 L140.7 216 L140.8 218.8 L140.9 221.5 L141 224.2 L141.7 226.9 L142.4 227.8 L143.1 227 L143.8 224.4 L144 221.7 L144.2 219 L144.5 216.3 L144.8 213.6 L145.2 210.9 L144.9 211.5 L144.9 214.5 L145 217.5 L145.1 220.6 L145.2 223.6 L145.4 226.6 L146.2 229.7 L146.8 230.5 L147.6 229.8 L148.3 226.8 L148.4 223.8 L148.6 220.8 L148.8 217.8 L149.1 214.8 L149.4 211.8 L149.1 211.2 L149.3 213.9 L149.5 216.7 L149.7 219.4 L150 222.1 L150.2 224.8 L151.1 227.6 L151.7 228.5 L152.5 227.7 L153 225 L153.1 222.3 L153.1 219.6 L153.2 216.9 L153.3 214.2 L153.5 211.5 L153.7 208.8 L155.7 210.8 L158 212.8 L160.1 214.1 L161.7 215 L162.8 214.2 L162.6 212.8 L160.4 209.9 L157.8 206.4 L156 203 L154.2 199.6 L152.8 196.8 L151.5 193.4 Z"];
+  var CENTER = ["M92.4 33 L107.6 33 L108 44 C108.6 50 111 55 117 60 L83 60 C89 55 91.4 50 92 44 Z",
+    "M100 4.5 C108.5 4.5 114.5 10.5 114.5 20.5 C114.5 30 110.5 38 105 42 C102.8 43.6 97.2 43.6 95 42 C89.5 38 85.5 30 85.5 20.5 C85.5 10.5 91.5 4.5 100 4.5 Z"];
+  var FRONT = {
+    chest:"M102.5 71.5 C103.8 68.8 107.2 69.8 110 69.5 C112.8 69.2 116.2 69.4 119 70 C121.8 70.6 124.5 71.2 126.5 73 C128.5 74.8 130 77.8 130.8 80.5 C131.6 83.2 131.7 86.4 131.2 89 C130.7 91.6 129.4 94 127.6 96 C125.8 98 123 99.6 120.5 101 C118 102.4 115 103.7 112.5 104.4 C110 105.1 107.5 105.8 105.8 105.4 C104.1 105 103.1 105.2 102.5 102 C101.9 98.8 102.2 91.1 102.2 86 C102.2 80.9 101.2 74.2 102.5 71.5 Z",
+    fdelt:"M135.8 110.5 C136.4 110.4 137 109.5 137.3 108.2 C137.6 106.8 137.8 104.6 137.7 102.2 C137.7 99.8 137.5 96.7 137 93.7 C136.5 90.7 135.7 87.3 134.8 84.3 C133.9 81.3 132.6 78.3 131.5 75.9 C130.4 73.5 129.1 71.3 128 70.1 C126.9 68.9 125.9 68.3 125.1 68.6 C124.4 68.9 123.8 70.2 123.5 71.8 C123.1 73.4 122.9 75.6 122.9 78.1 C122.9 80.7 122.9 84 123.5 87.1 C124.1 90.1 125.3 93.3 126.4 96.1 C127.5 98.9 128.9 101.7 130 103.9 C131.2 106 132.4 107.9 133.3 109 C134.3 110.1 135.1 110.7 135.8 110.5 Z",
+    sdelt:"M144.5 108.8 C145.1 108.7 145.6 107.8 145.9 106.4 C146.3 105 146.6 102.8 146.8 100.3 C146.9 97.8 147 94.6 146.7 91.5 C146.5 88.4 146.1 84.8 145.2 81.7 C144.4 78.7 142.7 75.6 141.5 73.3 C140.3 71.1 139.2 69.4 138.2 68.2 C137.2 67.1 136.2 66.3 135.5 66.3 C134.8 66.4 134.2 67.2 133.9 68.6 C133.7 70.1 133.7 72.7 134 75.3 C134.2 77.8 134.7 81.1 135.3 84.2 C135.9 87.2 136.7 90.7 137.4 93.6 C138.2 96.5 139.1 99.5 140 101.7 C140.8 104 141.7 105.9 142.4 107.1 C143.2 108.3 143.9 108.9 144.5 108.8 Z",
+    biceps:"M140.2 107.2 C141.2 108.5 141.7 109.9 142.3 111.3 C142.9 112.7 143.3 114.1 143.6 115.5 C144 116.9 144.2 118.3 144.4 119.7 C144.5 121.2 144.6 122.6 144.6 124 C144.6 125.4 144.5 126.9 144.4 128.3 C144.2 129.7 144.1 131.1 143.8 132.5 C143.4 133.9 143 136.7 142.3 136.8 C141.7 136.9 140.5 134.4 139.7 133.1 C138.9 131.9 138.3 130.6 137.7 129.3 C137.1 128 136.6 126.8 136.1 125.4 C135.6 124.1 135.1 122.8 134.7 121.4 C134.3 120.1 134 118.7 133.8 117.3 C133.5 115.9 133.4 114.5 133.3 113 C133.3 111.6 133.2 110.1 133.6 108.5 C134 107 134.8 103.8 135.9 103.5 C137 103.3 139.1 105.9 140.2 107.2 Z",
+    brachialis:"M148.2 115.7 C148.7 116.7 148.9 117.8 149.2 118.9 C149.5 119.9 149.7 121 149.9 122.1 C150.1 123.2 150.2 124.3 150.2 125.4 C150.3 126.5 150.3 127.6 150.3 128.6 C150.3 129.7 150.2 130.8 150.1 131.9 C150.1 133 150 134 149.9 135.1 C149.7 136.2 149.5 138.3 149.1 138.4 C148.8 138.4 148.1 136.4 147.7 135.4 C147.2 134.4 146.9 133.4 146.6 132.4 C146.3 131.4 146.1 130.4 145.8 129.3 C145.6 128.3 145.4 127.3 145.2 126.2 C145 125.1 144.9 124.1 144.8 123 C144.7 121.9 144.6 120.8 144.6 119.7 C144.6 118.6 144.6 117.5 144.8 116.3 C145 115.1 145.4 112.7 146 112.6 C146.6 112.5 147.6 114.6 148.2 115.7 Z",
+    forearms:"M151.1 151.2 C152.3 152.9 151.9 154.9 152 156.7 C152.1 158.5 152 160.3 151.9 162.1 C151.8 163.9 151.6 165.7 151.4 167.4 C151.1 169.2 150.8 170.9 150.5 172.6 C150.2 174.3 149.9 176 149.6 177.6 C149.2 179.3 148.9 180.9 148.5 182.5 C148 184.1 147.4 187.2 146.9 187.2 C146.5 187.2 146 184.1 145.7 182.5 C145.3 180.9 145 179.3 144.6 177.7 C144.3 176 143.9 174.4 143.5 172.8 C143.2 171.1 142.7 169.5 142.4 167.8 C142 166.1 141.6 164.5 141.3 162.8 C141 161.1 140.6 159.3 140.5 157.6 C140.3 155.8 139.6 154.1 140.4 152.2 C141.2 150.3 143.4 146.3 145.2 146.2 C147 146 150 149.4 151.1 151.2 Z",
+    abs:"M104.1 109 H107.2 Q109.4 109 109.4 111.2 V117.3 Q109.4 119.5 107.2 119.5 H104.1 Q101.9 119.5 101.9 117.3 V111.2 Q101.9 109 104.1 109 Z M104.1 121.5 H106.8 Q109 121.5 109 123.7 V129.6 Q109 131.8 106.8 131.8 H104.1 Q101.9 131.8 101.9 129.6 V123.7 Q101.9 121.5 104.1 121.5 Z M104.1 133.7 H106.4 Q108.6 133.7 108.6 135.9 V139.8 Q108.6 142 106.4 142 H104.1 Q101.9 142 101.9 139.8 V135.9 Q101.9 133.7 104.1 133.7 Z M104.1 143.3 H106.2 Q108.4 143.3 108.4 145.5 V148 Q108.4 150.2 106.2 150.2 H104.1 Q101.9 150.2 101.9 148 V145.5 Q101.9 143.3 104.1 143.3 Z",
+    obliques:"M122.7 113 C121.6 114.7 120.8 119.6 120.4 123 C120 126.4 119.8 130.3 120.3 133.7 C120.8 137 122.2 140.4 123.4 143 C124.6 145.7 125.9 147.4 127.3 149.6 C128.7 151.7 134.2 155 131.5 156.1 C128.9 157.2 114.8 157.2 111.4 156.1 C108 155 111.4 151.7 111.4 149.6 C111.4 147.4 111.4 145.7 111.4 143 C111.4 140.4 111.4 137 111.6 133.7 C111.8 130.3 110.1 126.4 112.6 123 C115.1 119.6 125 114.7 126.7 113 C128.4 111.3 123.7 111.3 122.7 113 Z",
+    quads:"M131.7 169.1 C133.2 170.3 132.7 173.5 132.8 176.2 C132.9 179 132.8 182.1 132.3 185.5 C131.9 188.9 131 192.9 130.2 196.7 C129.4 200.5 128.7 204.4 127.6 208.3 C126.5 212.1 125 216 123.8 219.9 C122.5 223.7 121 229.5 120.2 231.4 C119.5 233.3 120.3 233.3 119.4 231.4 C118.5 229.5 115.9 223.7 114.6 219.9 C113.3 216 112.2 212.1 111.5 208.3 C110.9 204.4 110.9 200.5 110.6 196.7 C110.4 192.9 110.1 188.9 110 185.5 C109.9 182.1 107.5 179 109.9 176.2 C112.2 173.5 120.6 170.3 124.2 169.1 C127.8 167.9 130.3 167.9 131.7 169.1 Z",
+    adductors:"M101.2 173.2 C100.4 175.2 101.7 180.8 101.8 185.5 C101.9 190.2 101.8 196.4 102 201.4 C102.2 206.3 102.4 211 102.9 215.2 C103.3 219.5 104.2 224.9 105 226.8 C105.7 228.7 107.2 228.7 107.4 226.8 C107.5 224.9 106.1 219.5 105.9 215.2 C105.6 211 105.7 206.3 105.7 201.4 C105.8 196.4 106.2 190.2 106.4 185.5 C106.5 180.8 107.5 175.2 106.6 173.2 C105.7 171.1 102 171.1 101.2 173.2 Z"};
+  var BACK = {
+    traps:"M100 53 C103.3 53 106.5 55.7 110 57 C113.5 58.3 117.2 59.3 121 61 C124.8 62.7 131.4 65.3 133.1 67 C134.8 68.7 132.3 67.8 131.1 71 C129.9 74.2 128.8 80.5 126 86 C123.2 91.5 118.3 98 114 104 C109.7 110 104.7 122 100 122 C95.3 122 90.3 110 86 104 C81.7 98 76.8 91.5 74 86 C71.2 80.5 70.1 74.2 68.9 71 C67.7 67.8 65.2 68.7 66.9 67 C68.6 65.3 75.2 62.7 79 61 C82.8 59.3 86.5 58.3 90 57 C93.5 55.7 96.7 53 100 53 Z",
+    rhom:"M102.2 93 C103.4 90.4 106.9 93.3 109 94.5 C111.1 95.7 113.5 97.9 115 100 C116.5 102.1 117.9 104.3 118 107 C118.1 109.7 117 113.3 115.5 116 C114 118.7 111.1 121.3 109 123 C106.9 124.7 104 128.2 102.8 126 C101.6 123.8 102.1 115.5 102 110 C101.9 104.5 101 95.6 102.2 93 Z",
+    rdelt:"M139.9 109.7 C141.1 109.5 142.2 108.5 143.1 107 C144 105.5 144.8 103.2 145.3 100.6 C145.8 98.1 146.2 94.7 146.1 91.6 C146 88.5 145.6 84.9 144.5 81.9 C143.5 78.9 141.5 76 139.9 73.7 C138.2 71.5 136.4 69.7 134.7 68.5 C133 67.4 131.2 66.6 129.8 66.9 C128.4 67.3 127.2 68.8 126.3 70.6 C125.4 72.4 124.8 75 124.4 77.7 C124.1 80.4 123.8 83.8 124.2 86.9 C124.6 89.9 125.8 93.2 127 96 C128.2 98.8 129.9 101.5 131.4 103.6 C132.9 105.7 134.5 107.4 135.9 108.5 C137.3 109.5 138.7 109.9 139.9 109.7 Z",
+    triceps:"M142.9 99.5 C144.4 101.2 144.8 103.2 145.5 105.1 C146.2 106.9 146.6 108.8 147 110.7 C147.3 112.6 147.5 114.5 147.6 116.4 C147.7 118.4 147.7 120.3 147.6 122.2 C147.6 124.1 147.4 126 147.1 127.8 C146.9 129.7 146.7 131.6 146.2 133.4 C145.7 135.3 145.2 138.9 144.3 139 C143.4 139.1 141.9 135.8 140.9 134.2 C139.9 132.6 139.2 130.9 138.4 129.2 C137.6 127.5 136.8 125.9 136.1 124.1 C135.4 122.4 134.8 120.7 134.2 118.9 C133.6 117.1 133.1 115.3 132.8 113.5 C132.4 111.7 132.1 109.8 132 107.8 C131.9 105.9 131.4 104 132.1 101.9 C132.8 99.7 134.4 95.2 136.2 94.9 C138 94.5 141.3 97.8 142.9 99.5 Z",
+    lats:"M128.8 99 C130.9 100.3 125.3 106.2 124.1 110 C122.8 113.8 121.7 118 121.2 122 C120.7 126 120.6 130.5 120.9 134 C121.2 137.5 124.1 141 123.1 143 C122 145 116.8 147.3 114.6 146 C112.4 144.7 111.1 139.3 110 135 C108.9 130.7 108.3 124.5 108 120 C107.7 115.5 107.4 111 108 108 C108.6 105 108 103.5 111.5 102 C115 100.5 126.7 97.7 128.8 99 Z",
+    lback:"M101.8 130 C102.8 124 106.6 127.5 108 129 C109.4 130.5 109.8 135.2 110 139 C110.2 142.8 109.9 148 109.4 152 C108.9 156 108.3 160.8 107 163 C105.7 165.2 102.7 170.5 101.8 165 C100.9 159.5 100.8 136 101.8 130 Z",
+    forearms:"M151.1 151.2 C152.3 152.9 151.9 154.9 152 156.7 C152.1 158.5 152 160.3 151.9 162.1 C151.8 163.9 151.6 165.7 151.4 167.4 C151.1 169.2 150.8 170.9 150.5 172.6 C150.2 174.3 149.9 176 149.6 177.6 C149.2 179.3 148.9 180.9 148.5 182.5 C148 184.1 147.4 187.2 146.9 187.2 C146.5 187.2 146 184.1 145.7 182.5 C145.3 180.9 145 179.3 144.6 177.7 C144.3 176 143.9 174.4 143.5 172.8 C143.2 171.1 142.7 169.5 142.4 167.8 C142 166.1 141.6 164.5 141.3 162.8 C141 161.1 140.6 159.3 140.5 157.6 C140.3 155.8 139.6 154.1 140.4 152.2 C141.2 150.3 143.4 146.3 145.2 146.2 C147 146 150 149.4 151.1 151.2 Z",
+    glutes:"M101.4 159.3 C103.3 157.5 108.2 156.7 113 156.4 C117.8 156.1 126.2 156.1 130 157.4 C133.9 158.6 134.9 161.5 135.8 163.9 C136.7 166.3 136.4 169.2 135.4 171.8 C134.5 174.4 132.8 177.7 130 179.7 C127.3 181.6 122.6 183.2 119 183.5 C115.5 183.8 111.2 182.9 108.5 181.5 C105.8 180.2 103.8 177.8 102.6 175.4 C101.4 173.1 101.6 169.8 101.4 167.2 C101.2 164.5 99.5 161.1 101.4 159.3 Z",
+    hams:"M130.8 189.9 C134.8 191.4 130.9 196 130.7 199 C130.4 202.1 129.9 205.2 129.3 208.3 C128.7 211.4 128.1 214.5 127.2 217.5 C126.3 220.6 124.8 223.7 123.7 226.8 C122.6 229.9 122 234.5 120.6 236 C119.1 237.6 116.8 237.6 115.1 236 C113.4 234.5 111.9 229.9 110.4 226.8 C109 223.7 107.3 220.6 106.4 217.5 C105.5 214.5 105.3 211.4 105 208.3 C104.8 205.2 104.8 202.1 105 199 C105.2 196 102 191.4 106.3 189.9 C110.6 188.3 126.7 188.3 130.8 189.9 Z",
+    calves:"M124.1 246.4 C126.5 248.2 126.3 252.4 126.6 256.8 C127 261.3 127 267.6 126 273 C125.1 278.4 122.6 284.4 120.8 289.2 C119.1 294 115.7 299.8 115.4 301.9 C115.1 304 119.3 304 119.2 301.9 C119.1 299.8 116.3 294 114.8 289.2 C113.3 284.4 111.1 278.4 110.4 273 C109.6 267.6 109.9 261.3 110.2 256.8 C110.5 252.4 110 248.2 112.3 246.4 C114.6 244.7 121.7 244.7 124.1 246.4 Z"};
+  var LINES = {"front": {"half": ["M130.8 95.8 C130.6 96.8 130.4 99.8 129.6 101.6 C128.8 103.4 127.4 105.4 125.8 106.8 C124.2 108.2 122 109.4 120.2 110.2 C118.4 111 116.4 111.4 114.8 111.6 C113.2 111.8 111.5 111.4 110.8 111.4", "M102.6 66.8 C103.7 66.3 106.6 64.2 109 63.8 C111.4 63.4 113.7 64 117 64.6 C120.3 65.2 127.1 66.9 129.1 67.4"], "center": ["M100 140.6 L100 143.5", "M88.5 175.8 C89.5 176.4 92.3 178.8 94.2 179.6 C96.1 180.4 98.1 180.6 100 180.6 C101.9 180.6 103.9 180.4 105.8 179.6 C107.7 178.8 110.5 176.4 111.5 175.8"]}, "back": {"half": ["M100 183.6 C100.8 184.1 102.7 185.8 104.5 186.6 C106.3 187.4 108.6 188.2 111 188.6 C113.4 189 116.3 189.3 119 189 C121.7 188.7 124.7 187.9 127 187 C129.3 186.1 131.3 184.8 133 183.4 C134.7 182 136.5 179.4 137.2 178.6"], "center": ["M100 165 C100 166.2 100.3 169.8 100.3 172 C100.3 174.2 100.2 176.1 100.2 178 C100.1 179.9 100 182.7 100 183.6"]}};   // light pencil details: lower breast curves, collarbones, navel, groin arc, glute fold + short cleft
+  var MIR = ' transform="translate(200 0) scale(-1 1)"';
+  function pp(d, st, mir){ return '<path d="' + d + '" style="' + st + '"/>' + (mir ? '<path d="' + d + '"' + MIR + ' style="' + st + '"/>' : ''); }
+  // each muscle group has its own colour; "helping" muscles show the same colour, softer
+  var MC = {chest:"#ff7a3d", fdelt:"#b07cf0", sdelt:"#9a6df0", rdelt:"#a77cf2", biceps:"#8fdc3c", brachialis:"#25d3b0", triceps:"#ffd23a",
+    forearms:"#35c8ff", abs:"#c8f03c", obliques:"#34d9a0", quads:"#ff6a3d", adductors:"#ffb02e", traps:"#3aa0ff", rhom:"#7a6bff",
+    lats:"#ff5a4a", lback:"#ffd23a", glutes:"#ff4256", hams:"#9be23a", calves:"#2fd6c0"};
+  function lighten(h, a){ var n = parseInt(h.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+    function m(v){ return Math.round(v + (255 - v) * a); } return "#" + [m(r), m(g), m(b)].map(function(v){ return ("0" + v.toString(16)).slice(-2); }).join(""); }
+  var MDEFS = '<defs>' +
+    '<linearGradient id="mbody" gradientUnits="userSpaceOnUse" x1="0" y1="4" x2="0" y2="340"><stop offset="0" stop-color="#cbd8e8"/><stop offset=".55" stop-color="#a5b6cb"/><stop offset="1" stop-color="#8699b2"/></linearGradient>' +
+    Object.keys(MC).map(function(k){ return '<radialGradient id="mg-' + k + '" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="' + lighten(MC[k], .4) + '"/><stop offset="1" stop-color="' + MC[k] + '"/></radialGradient>'; }).join("") +
+    '<filter id="mskw" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.4"/></filter>' +
+    '</defs>';
+  var ONE_PIECE = {traps:true};                       // drawn once, not mirrored
+  function figureSvg(view, ox, m){
+    var g = '<g transform="translate(' + ox + ' 0)">', set = view === "front" ? FRONT : BACK, id, ol = "fill:#8290a2;stroke:#8290a2;stroke-width:2;stroke-linejoin:round";
+    // light steel edge first, steel body on top, then a soft sheen
+    CENTER.forEach(function(d){ g += pp(d, ol, false); });
+    BODY.forEach(function(d){ g += pp(d, ol, true); });
+    CENTER.forEach(function(d){ g += pp(d, "fill:url(#mbody)", false); });
+    BODY.forEach(function(d){ g += pp(d, "fill:url(#mbody)", true); });
+    for(id in set){                                  // only the muscles this exercise works are drawn
+      var main = m.p.indexOf(id) >= 0, help = m.s.indexOf(id) >= 0;
+      if(main || help) g += pp(set[id], "fill:url(#mg-" + id + ")" + (help ? ";fill-opacity:.55" : "") + ";stroke:rgba(40,30,20,.45);stroke-width:.7;stroke-linejoin:round", !ONE_PIECE[id]);
+    }
+    var L = LINES[view], ls = "fill:none;stroke:#657285;stroke-width:.9;stroke-linecap:round;stroke-linejoin:round", ln = "";
+    L.half.forEach(function(d){ ln += pp(d, ls, true); });
+    L.center.forEach(function(d){ ln += pp(d, ls, false); });
+    g += '<g filter="url(#mskw)" opacity=".8">' + ln + '</g><g filter="url(#mskw)" opacity=".3" transform="translate(.6 .5)">' + ln + '</g>';   // pencil double line
+    return g + '</g>';
+  }
+  function renderMuscles(){
+    var m = getMuscles(), att = currentAtt();
+    mMap.innerHTML = '<svg viewBox="0 0 400 355" role="img" aria-label="Body with the working muscles lit, front and back">' + MDEFS + figureSvg("front", 0, m) + figureSvg("back", 200, m) +
+      '<text x="100" y="352" text-anchor="middle">FRONT</text><text x="300" y="352" text-anchor="middle">BACK</text></svg>';
+    mLegend.innerHTML = "";
+    function key(label, ids, soft){
+      var k = el("span", "k"); k.appendChild(document.createTextNode(label + ": "));
+      ids.forEach(function(id){ var c = el("span", "mchip"); var d = el("span", "mdot"); d.style.background = MC[id] || "#999"; if(soft) d.style.opacity = ".55"; c.appendChild(d); c.appendChild(document.createTextNode(MN[id] || id)); k.appendChild(c); });
+      mLegend.appendChild(k);
+    }
+    if(m.p.length) key("Main", m.p, false);
+    if(m.s.length) key("Helping", m.s, true);
+    if(!m.p.length) mLegend.appendChild(el("span", "hint", "Pick an exercise and the muscles it works light up on the body."));
+    mNote.textContent = att ? att.note : (m.p.length ? "General estimate by exercise. Grip, stance and form shift the emphasis." : "");
+  }
+
+  /* ---------- Equipment pictures: dumbbells and EZ bar (same metal look as the barbell) ---------- */
+  var PASTEL = ["#c5a6ec", "#8fb8f0", "#8fdcb4", "#f7d77a", "#f59cbc"];
+  function gdefs(q){
+    return '<defs>' +
+      '<linearGradient id="ch' + q + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262b30"/><stop offset=".12" stop-color="#97a0a7"/><stop offset=".22" stop-color="#ffffff"/><stop offset=".32" stop-color="#c7ced3"/><stop offset=".45" stop-color="#6b7278"/><stop offset=".58" stop-color="#a9b1b7"/><stop offset=".70" stop-color="#e9eef1"/><stop offset=".85" stop-color="#788087"/><stop offset="1" stop-color="#1f2327"/></linearGradient>' +
+      '<linearGradient id="so' + q + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f353a"/><stop offset=".2" stop-color="#d3dade"/><stop offset=".4" stop-color="#868e94"/><stop offset=".6" stop-color="#454b51"/><stop offset=".8" stop-color="#9aa2a8"/><stop offset="1" stop-color="#1f2326"/></linearGradient>' +
+      '<linearGradient id="sh' + q + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset=".09" stop-color="#fff" stop-opacity=".80"/><stop offset=".19" stop-color="#fff" stop-opacity=".12"/><stop offset=".32" stop-color="#fff" stop-opacity=".32"/><stop offset=".52" stop-color="#000" stop-opacity=".06"/><stop offset=".78" stop-color="#000" stop-opacity=".32"/><stop offset=".90" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity=".72"/></linearGradient>' +
+      '<radialGradient id="fc' + q + '" cx="40%" cy="38%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".62"/><stop offset=".55" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></radialGradient>' +
+      '<pattern id="br' + q + '" width="1.6" height="10" patternUnits="userSpaceOnUse"><line x1=".4" y1="0" x2=".4" y2="10" stroke="#fff" stroke-opacity=".14" stroke-width=".5"/></pattern>' +
+      '<pattern id="kn' + q + '" width="2.6" height="2.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="2.6" stroke="#000" stroke-opacity=".5" stroke-width=".9"/></pattern>' +
+      '<radialGradient id="fl' + q + '"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>' +
+      '</defs>';
+  }
+  function disc(x, y, w, h, col, q, rx){
+    var a = 'x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + w.toFixed(2) + '" height="' + h.toFixed(2) + '" rx="' + rx + '"';
+    return '<rect ' + a + ' fill="' + col + '" stroke="rgba(0,0,0,.65)" stroke-width=".7"/>' +
+      '<rect ' + a + ' fill="url(#so' + q + ')" opacity=".26"/><rect ' + a + ' fill="url(#br' + q + ')"/><rect ' + a + ' fill="url(#sh' + q + ')"/>' +
+      '<rect x="' + (x + .6).toFixed(2) + '" y="' + (y + .6).toFixed(2) + '" width="' + Math.max(w - 1.2, .5).toFixed(2) + '" height="' + (h - 1.2).toFixed(2) + '" rx="' + Math.max(rx - .4, .5) + '" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width=".5"/>';
+  }
+  function dumbbellG(lb, cx, cy, ang, threeD, q){
+    var R = 13 + (lb - 5) * (23 / 45), T = 9 + (lb - 5) * 0.18, e = R * 0.5, Lh = 62 + R * 0.7, rh = 5 + R * 0.09;
+    var col = PASTEL[(Math.round(lb / 5) - 1) % PASTEL.length], g = '', fs = Math.max(7, R * 0.62);
+    g += '<g transform="translate(' + cx + ' ' + cy + ') rotate(' + ang + ')">';
+    function side(sd){                                  // flat side view: one rounded disc, the number runs up its edge
+      var x0 = sd < 0 ? -Lh / 2 - T : Lh / 2;
+      return disc(x0, -R, T, 2 * R, col, q, 3) +
+        '<text transform="translate(' + (x0 + T / 2).toFixed(2) + ' 0) rotate(-90)" text-anchor="middle" dominant-baseline="central" font-size="' + Math.min(T * 0.78, fs).toFixed(1) + '" font-weight="700" font-family="Instrument Sans,Arial,sans-serif" fill="#3b2237" fill-opacity=".7">' + lb + '</text>';
+    }
+    function head3d(sd){                                // round disc seen at an angle: back rim, side wall, face
+      var xf = sd < 0 ? -Lh / 2 : Lh / 2 + T, xb = xf - T, o = '';
+      o += '<ellipse cx="' + xb.toFixed(2) + '" cy="0" rx="' + e.toFixed(2) + '" ry="' + R.toFixed(2) + '" fill="' + col + '" stroke="rgba(0,0,0,.6)" stroke-width=".7"/>' +
+           '<ellipse cx="' + xb.toFixed(2) + '" cy="0" rx="' + e.toFixed(2) + '" ry="' + R.toFixed(2) + '" fill="rgba(0,0,0,.3)"/>';
+      o += '<rect x="' + xb.toFixed(2) + '" y="' + (-R).toFixed(2) + '" width="' + T.toFixed(2) + '" height="' + (2 * R).toFixed(2) + '" fill="' + col + '"/>' +
+           '<rect x="' + xb.toFixed(2) + '" y="' + (-R).toFixed(2) + '" width="' + T.toFixed(2) + '" height="' + (2 * R).toFixed(2) + '" fill="url(#so' + q + ')" opacity=".26"/>' +
+           '<rect x="' + xb.toFixed(2) + '" y="' + (-R).toFixed(2) + '" width="' + T.toFixed(2) + '" height="' + (2 * R).toFixed(2) + '" fill="url(#sh' + q + ')"/>' +
+           '<line x1="' + xb.toFixed(2) + '" y1="' + (-R).toFixed(2) + '" x2="' + xf.toFixed(2) + '" y2="' + (-R).toFixed(2) + '" stroke="rgba(0,0,0,.6)" stroke-width=".7"/>' +
+           '<line x1="' + xb.toFixed(2) + '" y1="' + R.toFixed(2) + '" x2="' + xf.toFixed(2) + '" y2="' + R.toFixed(2) + '" stroke="rgba(0,0,0,.6)" stroke-width=".7"/>';
+      o += '<ellipse cx="' + xf.toFixed(2) + '" cy="0" rx="' + e.toFixed(2) + '" ry="' + R.toFixed(2) + '" fill="' + col + '" stroke="rgba(0,0,0,.6)" stroke-width=".7"/>' +
+           '<ellipse cx="' + xf.toFixed(2) + '" cy="0" rx="' + e.toFixed(2) + '" ry="' + R.toFixed(2) + '" fill="url(#fc' + q + ')"/>' +
+           '<ellipse cx="' + xf.toFixed(2) + '" cy="0" rx="' + (e * 0.8).toFixed(2) + '" ry="' + (R * 0.82).toFixed(2) + '" fill="none" stroke="#fff" stroke-opacity=".32" stroke-width=".6"/>';
+      if(sd > 0) o += '<text transform="translate(' + xf.toFixed(2) + ' 0) rotate(' + (-ang) + ')" text-anchor="middle" dominant-baseline="central" font-size="' + fs.toFixed(1) + '" font-weight="700" font-family="Instrument Sans,Arial,sans-serif" fill="#3b2237" fill-opacity=".72">' + lb + '</text>';
+      return o;
+    }
+    var handle = '<rect x="' + (-Lh / 2) + '" y="' + (-rh).toFixed(2) + '" width="' + Lh.toFixed(1) + '" height="' + (2 * rh).toFixed(2) + '" fill="url(#ch' + q + ')" stroke="rgba(0,0,0,.55)" stroke-width=".6"/>' +
+      '<rect x="-17" y="' + (-rh + .4).toFixed(2) + '" width="34" height="' + (2 * rh - .8).toFixed(2) + '" fill="url(#kn' + q + ')"/>';
+    if(threeD) g += head3d(-1) + handle + head3d(1);
+    else g += side(-1) + handle + side(1);
+    return g + '</g>';
+  }
+  function renderDbViz(){
+    var q = "db", lb = E.db, svg = '<svg viewBox="0 12 400 207" role="img" aria-label="Dumbbells, ' + lb + ' pounds each">' + gdefs(q);
+    svg += '<ellipse cx="200" cy="208" rx="150" ry="9" fill="url(#fl' + q + ')"/>';
+    if(E.hands === 2) svg += dumbbellG(lb, 172, 164, 0, false, q) + dumbbellG(lb, 230, 102, 50, true, q);
+    else svg += dumbbellG(lb, 200, 118, 50, true, q);
+    document.getElementById("dbViz").innerHTML = svg + '</svg><div class="cap">' + lb + ' lb ' + (E.hands === 2 ? "in each hand" : "in one hand") + '</div>';
+  }
+  function renderEzViz(){
+    var q = "ez", lb = E.ez, R = 16 + (lb - 20) * (26 / 30), T = 7 + (lb - 20) * 0.2, cy = 80;
+    var col = {20:"#8fb8f0", 30:"#f7d77a", 40:"#8fdcb4", 50:"#f59cbc"}[lb] || PASTEL[0];
+    var pts = [[56, cy], [148, cy], [165, cy - 17], [200, cy + 17], [235, cy - 17], [252, cy], [344, cy]];
+    var d = 'M' + pts.map(function(p){ return p[0] + ' ' + p[1]; }).join(' L');
+    var grip = 'M148 ' + cy + ' L165 ' + (cy - 17) + ' L200 ' + (cy + 17) + ' L235 ' + (cy - 17) + ' L252 ' + cy;
+    var svg = '<svg viewBox="0 0 400 160" role="img" aria-label="EZ bar, ' + lb + ' pounds">' + gdefs(q);
+    svg += '<ellipse cx="200" cy="146" rx="150" ry="8" fill="url(#fl' + q + ')"/>';
+    var st = 'fill="none" stroke-linejoin="round" stroke-linecap="round"';
+    svg += '<path d="' + d + '" ' + st + ' stroke="#262b30" stroke-width="11"/>' +
+           '<path d="' + d + '" ' + st + ' stroke="#c9d0d5" stroke-width="8.2"/>' +
+           '<path d="' + d + '" ' + st + ' stroke="#7c858c" stroke-width="3" transform="translate(0 2.3)"/>' +
+           '<path d="' + d + '" ' + st + ' stroke="#ffffff" stroke-width="2.2" stroke-opacity=".9" transform="translate(0 -2.1)"/>' +
+           '<path d="' + grip + '" ' + st + ' stroke="#1b1f23" stroke-width="8" stroke-dasharray="1.1 2.1" stroke-opacity=".38"/>';
+    function side(x){
+      return disc(x, cy - R, T, 2 * R, col, q, 2.6) +
+        '<rect x="' + (x < 200 ? x + T : x - 5).toFixed(2) + '" y="' + (cy - 11) + '" width="5" height="22" rx="1.4" fill="url(#ch' + q + ')" stroke="rgba(0,0,0,.6)" stroke-width=".5"/>';
+    }
+    svg += side(86) + side(314 - T);
+    svg += '<rect x="52" y="' + (cy - 5) + '" width="8" height="10" rx="3" fill="url(#ch' + q + ')" stroke="rgba(0,0,0,.6)" stroke-width=".5"/><rect x="340" y="' + (cy - 5) + '" width="8" height="10" rx="3" fill="url(#ch' + q + ')" stroke="rgba(0,0,0,.6)" stroke-width=".5"/>';
+    document.getElementById("ezViz").innerHTML = svg + '</svg><div class="cap">EZ bar · ' + lb + ' lb (weights are built in)</div>';
+  }
+  function renderGfx(){ if(E.type === "ez") renderEzViz(); else if(E.type === "db") renderDbViz(); }
+  function afterWeight(){ renderGfx(); updateLift(); }
+
+  /* ---------- Exercise chips ---------- */
+  function exList(){
+    var cat = EX[E.type], out = [];
+    AREA_ORDER.forEach(function(a){ (cat[a] || []).forEach(function(x){ if(out.indexOf(x) < 0) out.push(x); }); });
+    return out;
+  }
+  function areaOf(type, ex){
+    var cat = EX[type] || {}, a;
+    for(a in cat) if(cat[a].indexOf(ex) >= 0) return a;
+    return "";
+  }
+  var lAreaWrap = document.getElementById("lAreaWrap");
+  function renderLiftChips(){
+    var cat = EX[E.type], flat = (E.type === "ez" || E.type === "db");
+    lAreaWrap.hidden = flat;
+    if(flat){
+      L.area = null;
+      seg(lEx, exList().concat(["Other"]).map(function(x){ return {label:x, value:x}; }),
+        function(){ return L.ex; }, function(v){ L.ex = (L.ex === v) ? null : v; L.att = null; renderLiftChips(); });
+    } else {
+      var areas = AREA_ORDER.filter(function(a){ return cat[a]; });
+      if(L.area && !cat[L.area]){ L.area = null; L.ex = null; L.att = null; }
+      seg(lArea, areas.map(function(a){ return {label:a, value:a}; }),
+        function(){ return L.area; }, function(v){ L.area = (L.area === v) ? null : v; L.ex = null; L.att = null; renderLiftChips(); });
+      if(L.area){
+        seg(lEx, cat[L.area].concat(["Other"]).map(function(x){ return {label:x, value:x}; }),
+          function(){ return L.ex; }, function(v){ L.ex = (L.ex === v) ? null : v; L.att = null; renderLiftChips(); });
+      } else {
+        lEx.innerHTML = '<span class="hint" style="margin:0">Pick a body area to see exercises</span>';
+      }
+    }
+    var atts = L.ex ? ATT[E.type + "|" + L.ex] : null;
+    lAttWrap.hidden = !atts;
+    if(atts) seg(lAtt, atts.map(function(a){ return {label:a.label, value:a.id}; }),
+      function(){ return L.att; }, function(v){ L.att = (L.att === v) ? null : v; renderLiftChips(); });
+    lExOther.hidden = (L.ex !== "Other");
+    renderMuscles();
+  }
+
+  /* ---------- Weight pickers for the non-barbell equipment ---------- */
+  function renderFx(){
+    fxBody.innerHTML = "";
+    if(E.type === "ez"){
+      fxLabel.textContent = "EZ bar weight (lb). The number on the bar is the whole bar.";
+      var s1 = el("div", "seg"); fxBody.appendChild(s1);
+      seg(s1, [20, 30, 40, 50].map(function(w){ return {label:w + " lb", value:w}; }),
+        function(){ return E.ez; }, function(v){ E.ez = v; renderFx(); afterWeight(); });
+    } else if(E.type === "db"){
+      fxLabel.textContent = "Dumbbell weight, each hand (lb)";
+      var s2 = el("div", "seg"); fxBody.appendChild(s2);
+      var ws = []; for(var w = 5; w <= 50; w += 5) ws.push({label:String(w), value:w});
+      seg(s2, ws, function(){ return E.db; }, function(v){ E.db = v; renderFx(); afterWeight(); });
+      var l2 = el("label", "f", "Lifting"); l2.style.marginTop = "10px"; fxBody.appendChild(l2);
+      var s3 = el("div", "seg"); fxBody.appendChild(s3);
+      seg(s3, [{label:"Both hands together", value:2}, {label:"One hand at a time", value:1}],
+        function(){ return E.hands; }, function(v){ E.hands = v; renderFx(); afterWeight(); });
+    } else {
+      fxLabel.textContent = "Stack weight (lb)";
+      var row = el("div", "step"); row.style.justifyContent = "center";
+      var minus = el("button", "stepbig", "−5"), plus = el("button", "stepbig", "+5"), inp = el("input");
+      minus.type = "button"; plus.type = "button"; inp.type = "text"; inp.className = "mi"; inp.setAttribute("inputmode", "numeric");
+      inp.setAttribute("aria-label", "Machine stack weight in pounds"); inp.autocomplete = "off"; inp.value = E.machine;
+      function set(n){ E.machine = Math.max(0, n || 0); inp.value = E.machine; afterWeight(); }
+      minus.addEventListener("click", function(){ set(E.machine - 5); });
+      plus.addEventListener("click", function(){ set(E.machine + 5); });
+      inp.addEventListener("input", function(){ var n = parseInt(inp.value, 10); E.machine = isNaN(n) ? 0 : Math.max(0, n); afterWeight(); });
+      row.appendChild(minus); row.appendChild(inp); row.appendChild(plus); fxBody.appendChild(row);
+    }
+  }
+  function renderEquip(){
+    seg(eqSeg, EQ.map(function(q){ return {label:q.label, value:q.id}; }),
+      function(){ return E.type; }, function(v){ if(E.type !== v){ E.type = v; L.area = null; L.ex = null; L.att = null; } renderEquip(); });
+    var bb = E.type === "barbell";
+    pVizEl.hidden = !bb; bbCtl.hidden = !bb; fxCard.hidden = bb; document.getElementById("pReset").hidden = !bb;
+    document.getElementById("dbViz").hidden = E.type !== "db"; document.getElementById("ezViz").hidden = E.type !== "ez";
+    if(!bb) renderFx();
+    renderGfx(); renderLiftChips(); updateLift();
+  }
+
+  function kfmt(n){ return Number(parseFloat(n.toFixed(1))).toLocaleString(); }
+  function updateLift(){
+    var ld = getLoad(), reps = parseInt(lReps.value, 10), sets = parseInt(lSets.value, 10);
+    if(isNaN(sets)) sets = 1;
+    var ou = ld.unit === "lb" ? "kg" : "lb", conv = ld.unit === "lb" ? ld.total / LB_PER_KG : ld.total * LB_PER_KG;
+    if(ld.perHand){
+      document.getElementById("lWMain").textContent = fmt(ld.perHand) + " lb ×" + ld.hands;
+      document.getElementById("lWSub").textContent = fmt(ld.perHand / LB_PER_KG) + " kg each";
+    } else {
+      document.getElementById("lWMain").textContent = (fmt(ld.total) || "0") + " " + ld.unit;
+      document.getElementById("lWSub").textContent = (fmt(conv) || "0") + " " + ou;
+    }
+    if(ld.total > 0 && reps > 0 && sets > 0){
+      var vol = ld.total * reps * sets, other = ld.unit === "lb" ? vol / LB_PER_KG : vol * LB_PER_KG;
+      lVolBig.textContent = kfmt(vol) + " " + ld.unit;
+      lVolSub.textContent = fmt(ld.total) + " " + ld.unit + " × " + reps + " reps × " + sets + " sets  ·  " + kfmt(other) + " " + ou;
+    } else {
+      lVolBig.textContent = "0 " + ld.unit;
+      lVolSub.textContent = "Weight × reps × sets";
+    }
+  }
+  function flash(t){
+    lMsg.textContent = t;
+    if(msgTimer) clearTimeout(msgTimer);
+    msgTimer = setTimeout(function(){ lMsg.textContent = ""; }, 4500);
+  }
+  [lReps, lSets].forEach(function(el2){ el2.addEventListener("input", updateLift); });
+
+  /* ---------- Recording lifts (saved in this browser) ---------- */
+  var LOGKEY = "gymcalc.log", memLog = null;
+  function loadLog(){
+    try{ var a = JSON.parse(localStorage.getItem(LOGKEY) || "[]"); if(Array.isArray(a)) return a; }catch(e){}
+    return memLog || [];
+  }
+  function saveLog(a){
+    try{ localStorage.setItem(LOGKEY, JSON.stringify(a)); memLog = null; return true; }
+    catch(e){ memLog = a; return false; }
+  }
+  var navLog = document.getElementById("t-log");
+  function setBadge(){ var n = loadLog().length; navLog.textContent = n ? "Log · " + n : "Log"; }
+
+  lRec.addEventListener("click", function(){
+    var ld = getLoad(), reps = parseInt(lReps.value, 10), sets = parseInt(lSets.value, 10);
+    if(isNaN(sets)) sets = 1;
+    if(!(ld.total > 0)){ flash(E.type === "machine" ? "Enter the stack weight first." : "Pick a weight first."); return; }
+    if(!(reps > 0) || !(sets > 0)){ flash("Enter your reps (and sets) first."); return; }
+    var exName = L.ex === "Other" ? (lExOther.value.trim() || "Other") : (L.ex || "");
+    var att = currentAtt(), mus = getMuscles();
+    var per = {}, plateCount = 0;
+    if(E.type === "barbell") SETS[P.unit].plates.forEach(function(w){ var c = P.counts[P.unit][w] || 0; if(c){ per[w] = c; plateCount += c * 2; } });
+    var wl = ld.unit === "lb" ? ld.total : ld.total * LB_PER_KG, wk = ld.unit === "kg" ? ld.total : ld.total / LB_PER_KG;
+    var entry = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ts: Date.now(),
+      equipment: eqLabel(E.type), attachment: att ? att.label : "", perHand: ld.perHand || null, hands: ld.hands || null,
+      area: L.area || areaOf(E.type, L.ex), exercise: exName, muscles: {p: mus.p, s: mus.s},
+      unit: ld.unit, bar: E.type === "barbell" ? P.bar : 0, perSide: per, plates: plateCount,
+      weight: ld.total, weightLb: wl, weightKg: wk, reps: reps, sets: sets,
+      volume: ld.total * reps * sets, volumeLb: wl * reps * sets, volumeKg: wk * reps * sets,
+      note: lNote.value.trim()
+    };
+    var arr = loadLog(); arr.unshift(entry); if(arr.length > 500) arr.length = 500;
+    var ok = saveLog(arr);
+    flash(ok ? "Recorded ✓  It's in your Log tab." + (gh ? " Backing up to GitHub…" : "") : "Recorded for this session only: this browser isn't allowing saved data.");
+    autoSync();
+    lNote.value = ""; setBadge();
+    if(E.type === "barbell"){ P.halo = true; renderPlates(); }
+  });
+
+  /* ---------- Log tab ---------- */
+  var logList = document.getElementById("logList"), logCount = document.getElementById("logCount"), logMsg = document.getElementById("logMsg");
+  var logBox = document.getElementById("logBox"), pending = null;
+  function when(ts){ return new Date(ts).toLocaleString([], {weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}); }
+  function perSideText(e){
+    var keys = Object.keys(e.perSide || {}).map(Number).sort(function(a, b){ return b - a; });
+    var t = keys.length ? "Per side: " + keys.map(function(w){ return e.perSide[w] + " × " + w; }).join(" + ") : "No plates";
+    return t + (e.bar ? "  ·  " + e.bar + " " + e.unit + " bar" : "");
+  }
+  function detailText(e){
+    if(e.equipment === "Dumbbell" && e.perHand) return "Dumbbell · " + fmt(e.perHand) + " lb each hand" + (e.hands === 1 ? " (one at a time)" : " (both hands)");
+    if(e.equipment === "EZ bar") return "EZ bar · " + fmt(e.weight) + " lb";
+    if(e.equipment === "Machine") return "Machine" + (e.attachment ? " · " + e.attachment : "");
+    return perSideText(e) + "  ·  " + e.plates + " plates";
+  }
+  function weightText(e){ return (e.equipment === "Dumbbell" && e.perHand) ? fmt(e.perHand) + " lb each hand" : fmt(e.weight) + " " + e.unit; }
+  function el(tag, cls, text){ var n = document.createElement(tag); if(cls) n.className = cls; if(text != null) n.textContent = text; return n; }
+  function renderLog(){
+    var arr = loadLog();
+    logCount.textContent = arr.length + (arr.length === 1 ? " lift" : " lifts");
+    logList.innerHTML = "";
+    if(!arr.length){ var empty = el("div", "card hint", "Nothing recorded yet. Load plates, enter your reps, and tap Record lift."); logList.appendChild(empty); }
+    arr.forEach(function(e){
+      var card = el("div", "card entry");
+      card.appendChild(el("div", "t", when(e.ts)));
+      var title = [e.exercise, areaName(e.area)].filter(Boolean);
+      card.appendChild(el("div", "h", title.length ? title.join("  ·  ") : "Lift"));
+      var ou = e.unit === "lb" ? "kg" : "lb";
+      card.appendChild(el("div", "s", weightText(e) + " × " + e.reps + " reps × " + e.sets + " sets"));
+      card.appendChild(el("div", "s", "Volume " + kfmt(e.volume) + " " + e.unit + "  (" + kfmt(e.unit === "lb" ? e.volumeKg : e.volumeLb) + " " + ou + ")"));
+      card.appendChild(el("div", "d", detailText(e)));
+      if(e.muscles && (e.muscles.p.length || e.muscles.s.length)) card.appendChild(el("div", "d", "Works: " + mnames(e.muscles.p) + (e.muscles.s.length ? "  ·  Helping: " + mnames(e.muscles.s) : "")));
+      if(e.note) card.appendChild(el("div", "d", "Note: " + e.note));
+      var del = el("button", "del", "Delete"); del.type = "button";
+      del.addEventListener("click", function(){
+        if(pending && pending.id === e.id){
+          clearTimeout(pending.timer); pending = null;
+          addTomb([e.id]); saveLog(loadLog().filter(function(x){ return x.id !== e.id; })); setBadge(); renderLog(); autoSync();
+        } else {
+          if(pending){ clearTimeout(pending.timer); }
+          del.textContent = "Tap again to delete";
+          pending = {id:e.id, timer:setTimeout(function(){ pending = null; del.textContent = "Delete"; }, 3500)};
+        }
+      });
+      card.appendChild(del);
+      logList.appendChild(card);
+    });
+  }
+  function csvCell(v){ v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function toCsv(){
+    var rows = [["date","time","equipment","area","exercise","attachment","weight_lb","weight_kg","per_hand_lb","reps","sets","volume_lb","volume_kg","plates_per_side","bar","main_muscles","helping_muscles","note"]];
+    loadLog().slice().reverse().forEach(function(e){
+      var d = new Date(e.ts);
+      var per = Object.keys(e.perSide || {}).map(Number).sort(function(a, b){ return b - a; }).map(function(w){ return e.perSide[w] + "x" + w; }).join(" ");
+      rows.push([d.toLocaleDateString(), d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}), e.equipment || "Barbell", areaName(e.area), e.exercise, e.attachment || "",
+        fmt(e.weightLb), fmt(e.weightKg), e.perHand ? fmt(e.perHand) : "", e.reps, e.sets, fmt(e.volumeLb), fmt(e.volumeKg),
+        per ? per + " " + e.unit : "", e.bar ? e.bar + " " + e.unit : "none",
+        e.muscles ? mnames(e.muscles.p) : "", e.muscles ? mnames(e.muscles.s) : "", e.note]);
+    });
+    return rows.map(function(r){ return r.map(csvCell).join(","); }).join("\n");
+  }
+  document.getElementById("logCopy").addEventListener("click", function(){
+    var text = toCsv();
+    function fallback(){
+      logBox.hidden = false; logBox.value = text; logBox.focus(); logBox.select();
+      try{ document.execCommand("copy"); logMsg.textContent = "Text is selected below. Copy it."; }catch(e){ logMsg.textContent = "Select the text below and copy it."; }
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ logMsg.textContent = "Copied ✓"; setTimeout(function(){ logMsg.textContent = ""; }, 3000); }, fallback);
+    } else fallback();
+  });
+  var clearBtn = document.getElementById("logClear"), clearTimer = null;
+  clearBtn.addEventListener("click", function(){
+    if(clearTimer){
+      clearTimeout(clearTimer); clearTimer = null; clearBtn.textContent = "Clear all";
+      addTomb(loadLog().map(function(x){ return x.id; })); saveLog([]); setBadge(); renderLog(); autoSync();
+    } else {
+      clearBtn.textContent = "Tap again to clear all";
+      clearTimer = setTimeout(function(){ clearTimer = null; clearBtn.textContent = "Clear all"; }, 3500);
+    }
+  });
+
+  /* ---------- Private GitHub backup (the log goes to a file in YOUR private repo) ---------- */
+  var GHKEY = "gymcalc.gh", TOMBKEY = "gymcalc.tomb";
+  function lsGet(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; }catch(e){ return d; } }
+  function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+  var gh = lsGet(GHKEY, null), tomb = lsGet(TOMBKEY, []), syncing = false, again = false;
+  function addTomb(ids){ ids.forEach(function(id){ if(tomb.indexOf(id) < 0) tomb.push(id); }); lsSet(TOMBKEY, tomb); }
+  function toB64(str){ var b = new TextEncoder().encode(str), bin = "", q; for(q = 0; q < b.length; q++) bin += String.fromCharCode(b[q]); return btoa(bin); }
+  function fromB64(b64){ var bin = atob(String(b64).replace(/\s/g, "")), b = new Uint8Array(bin.length), q; for(q = 0; q < bin.length; q++) b[q] = bin.charCodeAt(q); return new TextDecoder().decode(b); }
+  var ghStatus = document.getElementById("ghStatus"), ghSyncBtn = document.getElementById("ghSync"), ghDisc = document.getElementById("ghDisc");
+  var ghSetup = document.getElementById("ghSetup"), ghRepo = document.getElementById("ghRepo"), ghPath = document.getElementById("ghPath");
+  var ghBranch = document.getElementById("ghBranch"), ghToken = document.getElementById("ghToken"), ghConnectBtn = document.getElementById("ghConnect");
+  function clock12(ts){ return new Date(ts).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}); }
+  function showGh(){
+    ghSyncBtn.hidden = !gh; ghDisc.hidden = !gh;
+    if(gh){
+      ghStatus.textContent = (gh.last ? "Backed up to " + gh.repo + " · last sync " + clock12(gh.last) : "Connected to " + gh.repo);
+      ghSetup.open = false; ghRepo.value = gh.repo; ghPath.value = gh.path; ghBranch.value = gh.branch;
+    } else {
+      ghStatus.textContent = "Saved on this device only.";
+    }
+  }
+  function ghHeaders(cfg, json){
+    var h = {"Authorization": "Bearer " + cfg.token, "Accept": "application/vnd.github+json"};
+    if(json) h["Content-Type"] = "application/json";
+    return h;
+  }
+  function ghErrText(err){
+    if(err && err.http === 401) return "GitHub rejected the token. Make a new one and reconnect.";
+    if(err && err.http === 403) return "GitHub said no (403). Check the token's Contents permission is Read and write.";
+    if(err && err.http === 404) return "GitHub can't find that repo, file path or branch, or the token can't see it.";
+    if(err && err.message && err.name !== "TypeError") return err.message;
+    return "Couldn't reach GitHub from this page. (The copy that runs inside Claude blocks outside connections. Use the copy you host yourself.)";
+  }
+  function httpErr(res){ var e = new Error("HTTP " + res.status); e.http = res.status; return e; }
+  function ghCheck(cfg){
+    return fetch("https://api.github.com/repos/" + cfg.repo, {headers: ghHeaders(cfg)}).then(function(res){
+      if(!res.ok) throw httpErr(res);
+      return res.json();
+    }).then(function(info){
+      if(!info.private) throw new Error("That repo is PUBLIC, so anyone could read your log. Pick a private repo.");
+      if(info.permissions && info.permissions.push === false) throw new Error("The token can see that repo but can't write to it. Give it Contents: Read and write.");
+      return true;
+    });
+  }
+  function mergeLogs(local, remote, dead){
+    var kill = {}, map = {};
+    dead.forEach(function(id){ kill[id] = 1; });
+    remote.concat(local).forEach(function(e){ if(e && e.id && !kill[e.id]) map[e.id] = e; });
+    return Object.keys(map).map(function(k){ return map[k]; }).sort(function(a, b){ return b.ts - a.ts; }).slice(0, 2000);
+  }
+  function sameIds(a, b){ return a.length === b.length && a.slice().sort().join("|") === b.slice().sort().join("|"); }
+  function ghSyncOnce(retried){
+    var url = "https://api.github.com/repos/" + gh.repo + "/contents/" + gh.path.split("/").map(encodeURIComponent).join("/");
+    return fetch(url + "?ref=" + encodeURIComponent(gh.branch), {headers: ghHeaders(gh)}).then(function(res){
+      if(res.status === 404) return {entries: [], deleted: [], sha: null};
+      if(!res.ok) throw httpErr(res);
+      return res.json().then(function(j){
+        var data = {}; try{ data = JSON.parse(fromB64(j.content)); }catch(e){}
+        return {entries: Array.isArray(data.entries) ? data.entries : [], deleted: Array.isArray(data.deleted) ? data.deleted : [], sha: j.sha};
+      });
+    }).then(function(remote){
+      var dead = tomb.slice(); remote.deleted.forEach(function(id){ if(dead.indexOf(id) < 0) dead.push(id); });
+      var merged = mergeLogs(loadLog(), remote.entries, dead);
+      var need = !sameIds(merged.map(function(e){ return e.id; }), remote.entries.map(function(e){ return e.id; })) || !sameIds(dead, remote.deleted);
+      function finish(){
+        tomb = dead; lsSet(TOMBKEY, tomb); saveLog(merged); gh.last = Date.now(); lsSet(GHKEY, gh);
+        setBadge(); renderLog(); showGh();
+      }
+      if(!need){ finish(); return; }
+      var body = {message: "gym log: " + merged.length + " lifts", branch: gh.branch,
+                  content: toB64(JSON.stringify({version: 1, entries: merged, deleted: dead}, null, 1))};
+      if(remote.sha) body.sha = remote.sha;
+      return fetch(url, {method: "PUT", headers: ghHeaders(gh, true), body: JSON.stringify(body)}).then(function(res){
+        if((res.status === 409 || res.status === 422) && !retried) return ghSyncOnce(true);   // someone else wrote first: merge again
+        if(!res.ok) throw httpErr(res);
+        finish();
+      });
+    });
+  }
+  function ghSync(){
+    if(!gh) return Promise.resolve();
+    if(syncing){ again = true; return Promise.resolve(); }
+    syncing = true; ghStatus.textContent = "Syncing…";
+    return ghSyncOnce(false).catch(function(err){
+      ghStatus.textContent = "Not backed up: " + ghErrText(err);
+    }).then(function(){
+      syncing = false;
+      if(again){ again = false; return ghSync(); }
+    });
+  }
+  function autoSync(){ if(gh) ghSync(); }
+  ghSyncBtn.addEventListener("click", ghSync);
+  ghDisc.addEventListener("click", function(){
+    gh = null; try{ localStorage.removeItem(GHKEY); }catch(e){}
+    ghToken.value = ""; showGh(); ghStatus.textContent = "Disconnected. The token was removed from this device. Your log is still saved here.";
+  });
+  ghConnectBtn.addEventListener("click", function(){
+    var cfg = {repo: ghRepo.value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").replace(/\/$/, ""),
+               path: (ghPath.value.trim() || "gym-log.json").replace(/^\/+/, ""),
+               branch: ghBranch.value.trim() || "main", token: ghToken.value.trim()};
+    if(!/^[\w.-]+\/[\w.-]+$/.test(cfg.repo)){ ghStatus.textContent = "Enter the repo as owner/name, like yourname/gym-log."; return; }
+    if(!cfg.token){ ghStatus.textContent = "Paste your access token first."; return; }
+    ghStatus.textContent = "Checking the repo…";
+    ghCheck(cfg).then(function(){
+      gh = cfg; lsSet(GHKEY, gh); ghToken.value = ""; showGh();
+      return ghSync();
+    }).catch(function(err){ ghStatus.textContent = "Not connected: " + ghErrText(err); });
+  });
+  showGh();
+
+  renderEquip();
+  setBadge();
+  renderPlates();
+  logReady = true;
+  autoSync();
+  if(!document.getElementById("log").hidden) renderLog();
+})();
+</script>
+</body>
+</html>
